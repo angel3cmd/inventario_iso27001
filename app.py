@@ -1,3 +1,8 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import Flask, render_template, request, redirect, session
 from models import init_db, agregar_activo, obtener_activos
 from auth import login_required, autenticar
@@ -5,7 +10,7 @@ from dashboard import obtener_metricas
 from export import exportar_excel
 
 app = Flask(__name__)
-app.secret_key = 'clave_secreta'
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'clave_por_defecto')
 init_db()
 
 @app.route('/')
@@ -39,3 +44,6 @@ def dashboard():
 def exportar():
     exportar_excel()
     return redirect('/')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

@@ -1,14 +1,23 @@
 version: '3.8'
 
 services:
-  inventario:
+  inventario_iso27001:
     build: .
     container_name: inventario_iso27001
     ports:
       - "5000:5000"
     volumes:
-      - inventario_data:/app
+      - ./inventario.db:/app/inventario.db
+      - ./backups:/app/backups
+      - ./secret.key:/app/secret.key:ro
     restart: always
 
-volumes:
-  inventario_data:
+  auto_backup:
+    build: .
+    container_name: auto_backup
+    command: python auto_backup.py
+    volumes:
+      - ./inventario.db:/app/inventario.db
+      - ./backups:/app/backups
+      - ./secret.key:/app/secret.key:ro
+    restart: always

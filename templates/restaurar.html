@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>Restaurar Backup</title></head>
+<body>
+
+<h2>Restaurar Backups</h2>
+<!-- lista de archivos -->
+<p><a href="{{ url_for('home') }}">⬅️ Volver al inicio</a></p>
+
+  <h1>Backups disponibles</h1>
+  <ul>
+    {% for archivo in archivos %}
+      <li>
+        {{ archivo }}
+        <a href="{{ url_for('restaurar', nombre=archivo) }}">Restaurar</a>
+      </li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

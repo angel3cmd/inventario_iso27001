@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Historial de Backups</title>
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+
+<h2>Historial de Auditoría</h2>
+<!-- filtros y tabla -->
+<p><a href="{{ url_for('home') }}">⬅️ Volver al inicio</a></p>
+
+  <h1>Auditoría de Envíos y Restauraciones</h1>
+  <p>
+  <a href="{{ url_for('exportar_auditoria') }}">📥 Exportar como CSV</a>
+</p>
+
+<form method="post">
+  <label>Filtrar por fecha:</label>
+  <input type="text" name="fecha" placeholder="2025-10">
+  <label>Filtrar por destino:</label>
+  <input type="text" name="destino" placeholder="correo, restauración">
+  <button type="submit">Filtrar</button>
+</form>
+
+  <table>
+    <tr>
+      <th>Fecha</th>
+      <th>Archivo</th>
+      <th>Destino</th>
+    </tr>
+    {% for fecha, archivo, destino in registros %}
+    <tr>
+      <td>{{ fecha }}</td>
+      <td>{{ archivo }}</td>
+      <td>{{ destino }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

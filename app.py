@@ -10,7 +10,10 @@ from dashboard import obtener_metricas
 from export import exportar_excel
 
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'clave_por_defecto')
+from config import config_by_name
+
+env = os.getenv('FLASK_ENV', 'development')
+app.config.from_object(config_by_name[env])
 init_db()
 
 @app.route('/')

@@ -1,0 +1,11 @@
+tags:
+  - name: Test
+    description: Endpoint de prueba
+
+paths:
+  /ping:
+    get:
+      summary: Verificar que la API está activa
+      responses:
+        200:
+          description: Pong!

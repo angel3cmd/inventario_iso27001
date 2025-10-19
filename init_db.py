@@ -1,14 +1,19 @@
 import sqlite3
+import os
 
-conn = sqlite3.connect('inventario.db')
-conn.execute("""
-CREATE TABLE IF NOT EXISTS auditoria_envios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    fecha TEXT,
-    archivo TEXT,
-    destino TEXT
-)
-""")
-conn.commit()
-conn.close()
-print("✅ Tabla auditoria_envios creada (si no existía).")
+print("🧱 Inicializando base de datos...")
+
+if not os.path.exists("schema.sql"):
+    print("❌ No se encontró schema.sql")
+    exit(1)
+
+try:
+    conn = sqlite3.connect("inventario.db")
+    with open("schema.sql", "r", encoding="utf-8") as f:
+        conn.executescript(f.read())
+    conn.commit()
+    conn.close()
+    print("✅ inventario.db creada con schema.sql")
+except Exception as e:
+    print(f"❌ Error al inicializar la base de datos: {e}")
+    exit(1)

@@ -1,0 +1,25 @@
+tags:
+  - name: Auditoría
+    description: Consultas y exportaciones de auditoría de backups
+
+paths:
+  /auditoria:
+    get:
+      summary: Ver registros de auditoría
+      responses:
+        200:
+          description: Página con registros filtrables
+
+  /auditoria/exportar:
+    get:
+      summary: Exportar auditoría como CSV con firma digital
+      responses:
+        200:
+          description: Archivo CSV descargable
+
+  /auditoria/pdf:
+    get:
+      summary: Exportar auditoría como PDF
+      responses:
+        200:
+          description: Archivo PDF descargable

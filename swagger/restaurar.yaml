@@ -1,0 +1,25 @@
+tags:
+  - name: Restauración
+    description: Restaurar backups cifrados
+
+paths:
+  /restaurar:
+    get:
+      summary: Listar archivos cifrados disponibles
+      responses:
+        200:
+          description: Página con lista de backups
+
+  /restaurar/{nombre}:
+    get:
+      summary: Restaurar y descargar archivo
+      parameters:
+        - name: nombre
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Archivo restaurado descargable
+        404:
+          description: Archivo no encontrado

@@ -1,0 +1,11 @@
+tags:
+  - name: Dashboard
+    description: Métricas generales del inventario
+
+paths:
+  /dashboard:
+    get:
+      summary: Ver métricas del inventario
+      responses:
+        200:
+          description: Página con métricas de activos

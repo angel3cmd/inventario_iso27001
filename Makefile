@@ -1,16 +1,37 @@
-init:
-    pip install -r requirements.txt
-    python -c "from cryptography.fernet import Fernet; open('secret.key', 'wb').write(Fernet.generate_key())"
-    python init_db.py
+SHELL := /bin/bash
+
+OS := $(shell uname -s)
+
+setup:
+    @python preflight.py
+ifeq ($(OS),Linux)
+    @echo "🐧 Ejecutando setup.sh para Linux..."
+    chmod +x setup.sh
+    ./setup.sh
+else ifeq ($(OS),Darwin)
+    @echo "🍎 Ejecutando setup.sh para macOS..."
+    chmod +x setup.sh
+    ./setup.sh
+else
+    @echo "🪟 Ejecutando setup.bat para Windows..."
+    setup.bat
+endif
 
 run:
-    docker compose up -d
+    docker compose up -d --build
 
-reset:
+stop:
     docker compose down
-    docker compose build
-    docker compose up -d
+
+backup:
+    docker exec inventario_iso27001 python auto_backup.py
+
+restore:
+    @echo "🔁 Accede a http://localhost:5000/restaurar"
+
+docs:
+    @echo "📄 Accede a http://localhost:5000/apidocs"
 
 clean:
-    rm -f secret.key
-    rm -f auditoria_backups.csv auditoria_backups.pdf
+    docker compose down -v
+    rm -f backups/restaurado_*.xlsx

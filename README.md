@@ -267,3 +267,120 @@ make up
 Accede a la app:
 
 http://localhost:5000
+
+
+##############################################################
+v4
+
+Documentación del proyecto
+
+# Inventario ISO 27001
+
+Sistema web para gestionar activos de TI conforme a estándares de seguridad y auditoría. Incluye autenticación, cifrado de backups, exportación de auditoría y documentación Swagger protegida.
+
+## 🚀 Requisitos
+
+- Python 3.11+
+- Docker y Docker Compose
+- Make (Linux/macOS) o PowerShell (Windows)
+- Navegador web
+
+## ⚙️ Instalación rápida
+
+```bash
+make setup
+make run
+
+Endpoints principales
+
+Endpoints principales
+/login: acceso seguro
+
+/: inventario de activos
+
+/dashboard: métricas
+
+/auditoria: historial de envíos
+
+/restaurar: restaurar backups cifrados
+
+/exportar: exportar inventario
+
+/auditoria/exportar: exportar CSV con firma
+
+/auditoria/pdf: exportar PDF
+
+/apidocs: documentación Swagger (requiere login)
+
+Seguridad
+Autenticación por sesión
+
+Cifrado AES de backups
+
+Auditoría de restauraciones
+
+Protección de documentación
+
+Estructura
+
+inventario_iso27001/
+├── app.py
+├── models.py
+├── auth.py
+├── dashboard.py
+├── export.py
+├── decrypt_file.py
+├── generar_pdf_auditoria.py
+├── templates/
+├── swagger/
+├── backups/
+├── .env.template
+├── Makefile
+├── setup.sh
+├── setup.bat
+
+
+Mantenimiento
+make backup: ejecuta backup cifrado
+
+make restore: lista backups disponibles
+
+make docs: abre Swagger UI
+
+make clean: elimina contenedores y volúmenes
+
+🧑‍💻 Autor
+Miguel — Arquitecto DevOps, apasionado por la automatización, seguridad y experiencia de desarrollo.
+
+
+---
+
+## 🛠️ `Makefile` — Automatización multiplataforma
+
+```makefile
+SHELL := /bin/bash
+
+setup:
+    @echo "🔧 Configurando entorno..."
+    cp -n .env.template .env || true
+    chmod +x setup.sh
+    ./setup.sh
+
+run:
+    docker compose up -d --build
+
+stop:
+    docker compose down
+
+backup:
+    docker exec inventario_iso27001 python auto_backup.py
+
+restore:
+    @echo "🔁 Accede a http://localhost:5000/restaurar"
+
+docs:
+    @echo "📄 Accede a http://localhost:5000/apidocs"
+
+clean:
+    docker compose down -v
+    rm -f backups/restaurado_*.xlsx

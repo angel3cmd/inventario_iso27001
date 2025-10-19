@@ -1,0 +1,11 @@
+tags:
+  - name: Exportación
+    description: Exportar inventario como Excel
+
+paths:
+  /exportar:
+    get:
+      summary: Exportar inventario como archivo Excel
+      responses:
+        200:
+          description: Redirección a descarga

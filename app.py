@@ -6,19 +6,27 @@ from io import StringIO
 from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, session, send_file, Response
+from flasgger import Swagger
 from models import init_db, agregar_activo, obtener_activos
-from auth import login_required, autenticar, es_admin, obtener_rol
-from dashboard import obtener_metricas
+from auth import login_required, autenticar, es_admin, obtener_rol, auth_blueprint
+from dashboard import obtener_metricas, dashboard_blueprint
 from export import exportar_excel
 from decrypt_file import decrypt_file
 from generar_pdf_auditoria import generar_pdf
+from config import config_by_name
+from flasgger import swag_from
 
 # 🔧 Configuración inicial
 load_dotenv()
 app = Flask(__name__)
-from config import config_by_name
-env = os.getenv('FLASK_ENV', 'development')
-app.config.from_object(config_by_name[env])
+app.config.from_object(config_by_name[os.getenv('FLASK_ENV', 'development')])
+swagger = Swagger(app)
+
+# 🔌 Registrar blueprints
+app.register_blueprint(auth_blueprint)
+app.register_blueprint(dashboard_blueprint)
+
+# 🗃️ Inicializar base de datos
 init_db()
 
 # 🔐 Crear tabla auditoria_envios si no existe
@@ -34,6 +42,13 @@ CREATE TABLE IF NOT EXISTS auditoria_envios (
 conn.commit()
 conn.close()
 
+# 🔐 Proteger Swagger UI y JSON
+@app.before_request
+def proteger_swagger():
+    if request.path.startswith('/apidocs') or request.path.startswith('/apispec_1.json'):
+        if 'usuario' not in session:
+            return redirect('/login')
+
 # 🏠 Panel principal con navegación por rol
 @app.route('/home')
 @login_required
@@ -42,6 +57,7 @@ def home():
 
 # 🔐 Login
 @app.route('/login', methods=['GET', 'POST'])
+@swag_from('swagger/login.yaml')
 def login():
     if request.method == 'POST':
         usuario = request.form['usuario']
@@ -74,6 +90,7 @@ def agregar():
 # 📊 Dashboard
 @app.route('/dashboard')
 @login_required
+@swag_from('swagger/dashboard.yaml')
 def dashboard():
     metricas = obtener_metricas()
     return render_template('dashboard.html', metricas=metricas)
@@ -81,6 +98,7 @@ def dashboard():
 # 📤 Exportar Excel
 @app.route('/exportar')
 @login_required
+@swag_from('swagger/exportar_excel.yaml')
 def exportar():
     exportar_excel()
     return redirect('/')
@@ -88,12 +106,14 @@ def exportar():
 # 🔁 Restaurar backup cifrado
 @app.route('/restaurar')
 @login_required
+@swag_from('swagger/restaurar.yaml')
 def listar_backups():
     archivos = [f for f in os.listdir('backups') if f.endswith('.enc')]
     return render_template('restaurar.html', archivos=archivos)
 
 @app.route('/restaurar/<nombre>')
 @login_required
+@swag_from('swagger/restaurar.yaml')
 def restaurar(nombre):
     encrypted_path = os.path.join('backups', nombre)
     output_path = os.path.join('backups', 'restaurado_' + nombre.replace('.enc', '.xlsx'))
@@ -114,6 +134,7 @@ def restaurar(nombre):
 # 🧾 Auditoría con filtros
 @app.route('/auditoria', methods=['GET', 'POST'])
 @login_required
+@swag_from('swagger/auditoria.yaml')
 def ver_auditoria():
     filtro_fecha = request.form.get('fecha')
     filtro_destino = request.form.get('destino')
@@ -140,6 +161,7 @@ def ver_auditoria():
 # 📥 Exportar auditoría como CSV con firma digital
 @app.route('/auditoria/exportar')
 @login_required
+@swag_from('swagger/auditoria.yaml')
 def exportar_auditoria():
     if not es_admin(session['usuario']):
         return "Acceso restringido", 403
@@ -165,12 +187,27 @@ def exportar_auditoria():
 # 📄 Exportar auditoría como PDF
 @app.route('/auditoria/pdf')
 @login_required
+@swag_from('swagger/auditoria.yaml')
 def exportar_pdf():
     if not es_admin(session['usuario']):
         return "Acceso restringido", 403
 
     path = generar_pdf()
     return send_file(path, as_attachment=True)
+
+# 🧪 Endpoint de prueba para Swagger
+@app.route('/ping', methods=['GET'])
+def ping():
+    """
+    Ping endpoint
+    ---
+    tags:
+      - Test
+    responses:
+      200:
+        description: Pong!
+    """
+    return "Pong!", 200
 
 # 🚀 Ejecutar app
 if __name__ == '__main__':

@@ -1,4 +1,10 @@
+from flask import Blueprint, render_template, session
+from auth import login_required
+dashboard_blueprint = Blueprint('dashboard', __name__)
+
+
 import sqlite3
+
 
 def obtener_metricas():
     conn = sqlite3.connect('inventario.db')
@@ -15,3 +21,13 @@ def obtener_metricas():
         "confidencial": confidencial,
         "sin_propietario": sin_propietario
     }
+
+
+@dashboard_blueprint.route('/dashboard')
+@login_required
+def dashboard():
+    metricas = obtener_metricas()
+    return render_template('dashboard.html', metricas=metricas)
+
+
+__all__ = ['obtener_metricas', 'dashboard_blueprint']

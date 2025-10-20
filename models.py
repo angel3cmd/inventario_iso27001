@@ -1,7 +1,11 @@
 import sqlite3
+import os
 
 def init_db():
-    conn = sqlite3.connect('inventario.db')
+    db_path = 'data/inventario.db'
+    if os.path.isdir(db_path):
+        raise RuntimeError(f"Error: '{db_path}' es una carpeta, no un archivo de base de datos.")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS activos (
@@ -29,7 +33,7 @@ def init_db():
 def agregar_activo(nombre, tipo, propietario, ubicacion, clasificacion, estado, fecha_alta, etiqueta):
     if clasificacion not in ['Confidencial', 'Interna', 'Pública']:
         raise ValueError("Clasificación inválida según ISO 27001")
-    conn = sqlite3.connect('inventario.db')
+    conn = sqlite3.connect('data/inventario.db')
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO activos (nombre, tipo, propietario, ubicacion, clasificacion, estado, fecha_alta, etiqueta)
@@ -39,7 +43,7 @@ def agregar_activo(nombre, tipo, propietario, ubicacion, clasificacion, estado, 
     conn.close()
 
 def obtener_activos():
-    conn = sqlite3.connect('inventario.db')
+    conn = sqlite3.connect('data/inventario.db')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM activos')
     activos = cursor.fetchall()

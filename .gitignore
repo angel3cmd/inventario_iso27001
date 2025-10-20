@@ -2,3 +2,9 @@ __pycache__/
 *.db
 *.xlsx
 .env
+
+# Ignorar archivos locales
+data/
+backups/
+__pycache__/
+*.pyc

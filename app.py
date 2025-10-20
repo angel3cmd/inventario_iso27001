@@ -6,7 +6,7 @@ from io import StringIO
 from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, session, send_file, Response
-from flasgger import Swagger
+from flasgger import Swagger, swag_from
 from models import init_db, agregar_activo, obtener_activos
 from auth import login_required, autenticar, es_admin, obtener_rol, auth_blueprint
 from dashboard import obtener_metricas, dashboard_blueprint
@@ -14,7 +14,10 @@ from export import exportar_excel
 from decrypt_file import decrypt_file
 from generar_pdf_auditoria import generar_pdf
 from config import config_by_name
-from flasgger import swag_from
+
+# 🗂️ Crear carpetas persistentes si no existen
+os.makedirs('data', exist_ok=True)
+os.makedirs('backups', exist_ok=True)
 
 # 🔧 Configuración inicial
 load_dotenv()
@@ -30,7 +33,7 @@ app.register_blueprint(dashboard_blueprint)
 init_db()
 
 # 🔐 Crear tabla auditoria_envios si no existe
-conn = sqlite3.connect('inventario.db')
+conn = sqlite3.connect('data/inventario.db')
 conn.execute("""
 CREATE TABLE IF NOT EXISTS auditoria_envios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,13 +52,11 @@ def proteger_swagger():
         if 'usuario' not in session:
             return redirect('/login')
 
-# 🏠 Panel principal con navegación por rol
 @app.route('/home')
 @login_required
 def home():
     return render_template('home.html', rol=session.get('rol'))
 
-# 🔐 Login
 @app.route('/login', methods=['GET', 'POST'])
 @swag_from('swagger/login.yaml')
 def login():
@@ -68,13 +69,11 @@ def login():
             return redirect('/home')
     return render_template('login.html')
 
-# 🔓 Logout
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/login')
 
-# 🏷️ Inventario
 @app.route('/')
 @login_required
 def index():
@@ -87,7 +86,6 @@ def agregar():
     agregar_activo(**request.form)
     return redirect('/')
 
-# 📊 Dashboard
 @app.route('/dashboard')
 @login_required
 @swag_from('swagger/dashboard.yaml')
@@ -95,7 +93,6 @@ def dashboard():
     metricas = obtener_metricas()
     return render_template('dashboard.html', metricas=metricas)
 
-# 📤 Exportar Excel
 @app.route('/exportar')
 @login_required
 @swag_from('swagger/exportar_excel.yaml')
@@ -103,7 +100,6 @@ def exportar():
     exportar_excel()
     return redirect('/')
 
-# 🔁 Restaurar backup cifrado
 @app.route('/restaurar')
 @login_required
 @swag_from('swagger/restaurar.yaml')
@@ -123,7 +119,7 @@ def restaurar(nombre):
 
     decrypt_file(encrypted_path, output_path)
 
-    conn = sqlite3.connect('inventario.db')
+    conn = sqlite3.connect('data/inventario.db')
     conn.execute("INSERT INTO auditoria_envios (fecha, archivo, destino) VALUES (?, ?, ?)",
                  (datetime.now().isoformat(), os.path.basename(output_path), 'restauración local'))
     conn.commit()
@@ -131,7 +127,6 @@ def restaurar(nombre):
 
     return send_file(output_path, as_attachment=True)
 
-# 🧾 Auditoría con filtros
 @app.route('/auditoria', methods=['GET', 'POST'])
 @login_required
 @swag_from('swagger/auditoria.yaml')
@@ -151,14 +146,13 @@ def ver_auditoria():
 
     query += " ORDER BY fecha DESC"
 
-    conn = sqlite3.connect('inventario.db')
+    conn = sqlite3.connect('data/inventario.db')
     cursor = conn.execute(query, params)
     registros = cursor.fetchall()
     conn.close()
 
     return render_template('auditoria.html', registros=registros)
 
-# 📥 Exportar auditoría como CSV con firma digital
 @app.route('/auditoria/exportar')
 @login_required
 @swag_from('swagger/auditoria.yaml')
@@ -166,7 +160,7 @@ def exportar_auditoria():
     if not es_admin(session['usuario']):
         return "Acceso restringido", 403
 
-    conn = sqlite3.connect('inventario.db')
+    conn = sqlite3.connect('data/inventario.db')
     cursor = conn.execute("SELECT fecha, archivo, destino FROM auditoria_envios ORDER BY fecha DESC")
     registros = cursor.fetchall()
     conn.close()
@@ -184,7 +178,6 @@ def exportar_auditoria():
     response.headers['Content-Disposition'] = 'attachment; filename=auditoria_backups.csv'
     return response
 
-# 📄 Exportar auditoría como PDF
 @app.route('/auditoria/pdf')
 @login_required
 @swag_from('swagger/auditoria.yaml')
@@ -195,20 +188,9 @@ def exportar_pdf():
     path = generar_pdf()
     return send_file(path, as_attachment=True)
 
-# 🧪 Endpoint de prueba para Swagger
 @app.route('/ping', methods=['GET'])
 def ping():
-    """
-    Ping endpoint
-    ---
-    tags:
-      - Test
-    responses:
-      200:
-        description: Pong!
-    """
     return "Pong!", 200
 
-# 🚀 Ejecutar app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

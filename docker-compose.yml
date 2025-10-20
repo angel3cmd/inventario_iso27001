@@ -7,7 +7,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./inventario.db:/app/inventario.db
+      - ./data:/app/data
       - ./backups:/app/backups
       - ./secret.key:/app/secret.key:ro
     restart: always
@@ -17,7 +17,7 @@ services:
     container_name: auto_backup
     command: python auto_backup.py
     volumes:
-      - ./inventario.db:/app/inventario.db
+      - ./data:/app/data
       - ./backups:/app/backups
       - ./secret.key:/app/secret.key:ro
     restart: always

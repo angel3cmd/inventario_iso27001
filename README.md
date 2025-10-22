@@ -384,3 +384,55 @@ docs:
 clean:
     docker compose down -v
     rm -f backups/restaurado_*.xlsx
+
+
+#############
+## Instalación local del proyecto
+
+Este proyecto requiere Python 3.11 para evitar problemas de compatibilidad con algunas dependencias como pandas y numpy.
+
+### Repositorio y creación de carpeta principal
+git clone https://github.com/tu-usuario/inventario_iso27001.git
+cd inventario_iso27001
+
+
+### 🔧 Pasos para instalar y ejecutar localmente:
+
+1. **Instalar Python 3.11**  
+   Descárgalo desde [python.org](https://www.python.org/downloads/release/python-3110/) y asegúrate de marcar la opción "Add Python to PATH" durante la instalación.
+
+2. **Crear un entorno virtual**  
+   Abre una terminal (CMD o PowerShell) y ejecuta:
+
+   ```bash
+   py -3.11 -m venv inventario-env
+   inventario-env\Scripts\activate
+
+
+En Git Bash, usa:
+
+bash
+source inventario-env/Scripts/activate
+Instalar dependencias Una vez activado el entorno virtual, instala las dependencias con:
+
+bash
+pip install -r requirements.txt
+
+Configurar variables de entorno
+Crea un archivo .env basado en .env.example:
+
+bash
+cp .env.example .env
+
+Ejecutar el proyecto Usa el comando correspondiente para iniciar la aplicación. Por ejemplo:
+
+
+Inicializar base de datos y claves
+bash
+python init.py
+
+bash
+python app.py
+(Ajusta este comando si el archivo principal tiene otro nombre.)
+
+Accede a http://localhost:5000 en tu navegador.

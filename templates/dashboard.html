@@ -17,5 +17,34 @@
     <li class="list-group-item">Activos sin propietario: {{ metricas.sin_propietario }}</li>
   </ul>
   <a href="/" class="btn btn-secondary mt-3">Volver al inventario</a>
+
+  <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Tipo</th>
+      <th>Propietario</th>
+      <th>Ubicación</th>
+      <th>Clasificación</th>
+      <th>Estado</th>
+      <th>Fecha Alta</th>
+      <th>Etiqueta</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for activo in activos %}
+    <tr>
+      <td>{{ activo[1] }}</td>
+      <td>{{ activo[2] }}</td>
+      <td>{{ activo[3] }}</td>
+      <td>{{ activo[4] }}</td>
+      <td>{{ activo[5] }}</td>
+      <td>{{ activo[6] }}</td>
+      <td>{{ activo[7] }}</td>
+      <td>{{ activo[8] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 </body>
 </html>

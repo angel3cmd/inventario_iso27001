@@ -2,10 +2,13 @@
 CREATE TABLE IF NOT EXISTS activos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
-    categoria TEXT,
-    responsable TEXT,
-    ubicacion TEXT,
-    fecha_registro TEXT
+    tipo TEXT NOT NULL,
+    propietario TEXT NOT NULL,
+    ubicacion TEXT NOT NULL,
+    clasificacion TEXT NOT NULL,
+    estado TEXT NOT NULL,
+    fecha_alta TEXT NOT NULL,
+    etiqueta TEXT
 );
 
 -- Tabla de auditoría de envíos
@@ -23,4 +26,3 @@ CREATE TABLE IF NOT EXISTS usuarios (
     clave TEXT NOT NULL,
     rol TEXT NOT NULL
 );
-s

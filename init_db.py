@@ -8,7 +8,7 @@ if not os.path.exists("schema.sql"):
     exit(1)
 
 try:
-    conn = sqlite3.connect("inventario.db")
+    conn = sqlite3.connect('data/inventario.db')
     with open("schema.sql", "r", encoding="utf-8") as f:
         conn.executescript(f.read())
     conn.commit()

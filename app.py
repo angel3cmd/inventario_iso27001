@@ -83,8 +83,20 @@ def index():
 @app.route('/agregar', methods=['POST'])
 @login_required
 def agregar():
-    agregar_activo(**request.form)
-    return redirect('/')
+    try:
+        agregar_activo(
+            nombre=request.form['nombre'],
+            tipo=request.form['tipo'],
+            propietario=request.form['propietario'],
+            ubicacion=request.form['ubicacion'],
+            clasificacion=request.form['clasificacion'],
+            estado=request.form['estado'],
+            fecha_alta=request.form['fecha_alta'],
+            etiqueta=request.form.get('etiqueta', '')
+        )
+        return redirect('/')
+    except ValueError as e:
+        return render_template('error.html', mensaje=str(e)), 400
 
 @app.route('/dashboard')
 @login_required

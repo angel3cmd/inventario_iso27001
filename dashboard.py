@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, session
 from auth import login_required
-from models import obtener_activos # asegúrate de importar esta función
+#Se cambia esta ruta
+#from models import obtener_activos # asegúrate de importar esta función
+from controllers.activos_controller import obtener_activos # asegúrate de importar esta función
 dashboard_blueprint = Blueprint('dashboard', __name__)
 
 

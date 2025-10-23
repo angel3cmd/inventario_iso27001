@@ -7,7 +7,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, session, send_file, Response
 from flasgger import Swagger, swag_from
-from models import init_db, agregar_activo, obtener_activos
+from models import init_db
+from controllers.activos_controller import agregar_activo, obtener_activos
 from auth import login_required, autenticar, es_admin, obtener_rol, auth_blueprint
 from dashboard import obtener_metricas, dashboard_blueprint
 from export import exportar_excel

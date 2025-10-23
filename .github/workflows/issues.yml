@@ -1,0 +1,66 @@
+issues:
+  - title: Validar campos en frontend con JavaScript
+    body: Agregar validación visual en el formulario de activos para evitar envíos incompletos o erróneos.
+    labels: [estructura, seguridad, prioridad alta]
+
+  - title: Registro de auditoría por usuario
+    body: Implementar una tabla `auditoria_envios` que registre quién agregó cada activo, con usuario, IP, timestamp y acción.
+    labels: [estructura, auditoría, prioridad alta]
+
+  - title: Separar lógica en controladores
+    body: Refactorizar `app.py` para mover lógica de negocio a módulos separados (`controllers/`, `services/`). Mejora la mantenibilidad y escalabilidad.
+    labels: [estructura, refactorización, prioridad alta]
+
+  - title: Script de verificación de base y claves
+    body: Crear `check_schema.py` que valide si la base de datos y claves están inicializadas correctamente. Mostrar advertencias si faltan.
+    labels: [estructura, validación, prioridad media]
+
+  - title: Automatizar backups cifrados
+    body: Crear script que genere backups automáticos de `inventario.db`, cifrados con una clave segura. Ejecutar cada 24h o al cerrar sesión.
+    labels: [estructura, seguridad, prioridad media]
+
+  - title: Mejorar README y `.gitignore`
+    body: Documentar instalación, exclusión de entorno virtual, y archivos sensibles. Incluir pasos para nuevos colaboradores.
+    labels: [estructura, documentación, prioridad media]
+
+  - title: Agregar pruebas unitarias
+    body: Usar `pytest` para probar funciones clave como `agregar_activo()` y `obtener_metricas()`.
+    labels: [estructura, testing, prioridad media]
+
+  - title: Crear changelog por versión
+    body: Documentar cambios por versión para trazabilidad ISO 27001 y revisión de auditoría.
+    labels: [estructura, documentación, prioridad baja]
+
+  - title: Mostrar métricas con gráficos en dashboard
+    body: Usar `Chart.js` para visualizar activos por tipo, clasificación y estado en el dashboard. Agregar gráficos de barras y pastel.
+    labels: [diseño, dashboard, prioridad alta]
+
+  - title: Agregar filtros en dashboard
+    body: Permitir filtrar activos por clasificación, propietario y estado directamente en la tabla del dashboard.
+    labels: [diseño, dashboard, prioridad media]
+
+  - title: Mensajes de éxito y error en formulario
+    body: Mostrar alertas visuales tras guardar un activo o si ocurre un error. Usar `Bootstrap alerts` para retroalimentación clara.
+    labels: [diseño, UX, prioridad media]
+
+  - title: Agregar búsqueda en tabla de activos
+    body: Implementar barra de búsqueda para filtrar activos por nombre, etiqueta o propietario en tiempo real.
+    labels: [diseño, UX, prioridad media]
+
+  - title: Mejorar layout con Bootstrap
+    body: Usar cards, badges, modales y colores para mejorar la presentación del dashboard y formularios.
+    labels: [diseño, visual, prioridad baja]
+
+  - title: Agregar íconos y colores por clasificación
+    body: Usar FontAwesome y colores para representar tipos de activos, estados y niveles de confidencialidad.
+    labels: [diseño, visual, prioridad baja]
+
+  - title: Tema oscuro/claro opcional
+    body: Agregar toggle visual para accesibilidad y preferencia de usuario.
+    labels: [diseño, UX, prioridad baja]
+  - title: Optimizar consultas a la base de datos
+    body: Revisar y optimizar consultas SQL para mejorar el rendimiento del dashboard y tiempos de carga.
+    labels: [estructura, rendimiento, prioridad alta]
+  - title: Implementar paginación en la tabla de activos
+    body: Dividir la tabla de activos en páginas para mejorar la usabilidad y tiempos de carga.
+    labels: [diseño, UX, prioridad media] 

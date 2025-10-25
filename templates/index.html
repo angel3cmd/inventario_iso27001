@@ -40,3 +40,29 @@
   </div>
   <button type="submit" class="btn btn-primary">Guardar</button>
 </form>
+<!--Búsqueda en tiempo real-->
+
+<input type="text" id="busqueda" placeholder="Buscar por nombre, etiqueta o propietario">
+<table id="tabla-activos">
+  <!-- Aquí se renderizan los activos -->
+</table>
+
+<script>
+  document.getElementById("busqueda").addEventListener("input", function () {
+    const query = this.value;
+    fetch(`/buscar_activos?query=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => {
+        const tabla = document.getElementById("tabla-activos");
+        tabla.innerHTML = "";
+        data.forEach(activo => {
+          tabla.innerHTML += `
+            <tr>
+              <td>${activo.nombre}</td>
+              <td>${activo.etiqueta}</td>
+              <td>${activo.propietario}</td>
+            </tr>`;
+        });
+      });
+  });
+</script>

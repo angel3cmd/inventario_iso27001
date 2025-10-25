@@ -36,3 +36,16 @@ def obtener_activos():
     activos = cursor.fetchall()
     conn.close()
     return activos
+
+import sqlite3
+
+def buscar_activos(query=""):
+    conn = sqlite3.connect("data/inventario.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT nombre, etiqueta, propietario FROM activos
+        WHERE nombre LIKE ? OR etiqueta LIKE ? OR propietario LIKE ?
+    """, (f"%{query}%", f"%{query}%", f"%{query}%"))
+    resultados = cursor.fetchall()
+    conn.close()
+    return resultados

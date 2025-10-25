@@ -15,6 +15,8 @@ from export import exportar_excel
 from decrypt_file import decrypt_file
 from generar_pdf_auditoria import generar_pdf
 from config import config_by_name
+from flask import request, jsonify
+from controllers.activos_controller import buscar_activos
 
 # 🗂️ Crear carpetas persistentes si no existen
 os.makedirs('data', exist_ok=True)
@@ -204,6 +206,22 @@ def exportar_pdf():
 @app.route('/ping', methods=['GET'])
 def ping():
     return "Pong!", 200
+
+#Búsqueda en tiempo real
+@app.route("/buscar_activos")
+def buscar_activos_route():
+    query = request.args.get("query", "")
+    resultados = buscar_activos(query)
+    return jsonify([
+        {
+            "nombre": r[0],
+            "etiqueta": r[1],
+            "propietario": r[2]
+        } for r in resultados
+    ])
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

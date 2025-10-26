@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, render_template, request, redirect, session, flash
+from lang import traducciones
 from functools import wraps
 import sqlite3
 
@@ -7,6 +8,7 @@ auth_blueprint = Blueprint('auth', __name__)
 # 🔐 Ruta de login
 @auth_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
+    idioma = session.get('idioma', 'es')  # ← Asegura que esto esté presente
     if request.method == 'POST':
         usuario = request.form['usuario']
         clave = request.form['clave']
@@ -14,8 +16,7 @@ def login():
             session['usuario'] = usuario
             session['rol'] = obtener_rol(usuario)
             return redirect('/home')
-    return render_template('login.html')
-
+    return render_template('login.html', t=traducciones[idioma])  # ← Aquí pasas t
 # 🔒 Decorador para proteger rutas
 def login_required(f):
     @wraps(f)

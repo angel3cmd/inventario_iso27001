@@ -17,6 +17,10 @@ from generar_pdf_auditoria import generar_pdf
 from config import config_by_name
 from flask import request, jsonify
 from controllers.activos_controller import buscar_activos
+from flask import flash, redirect, url_for
+from datetime import datetime
+from lang import traducciones
+from utils.render import render_con_idioma
 
 # 🗂️ Crear carpetas persistentes si no existen
 os.makedirs('data', exist_ok=True)
@@ -24,7 +28,10 @@ os.makedirs('backups', exist_ok=True)
 
 # 🔧 Configuración inicial
 load_dotenv()
-app = Flask(__name__)
+#app = Flask(__name__)
+#Para que agregue todo desde base
+app = Flask(__name__, template_folder='templates')
+app.secret_key = os.getenv("SECRET_KEY", "clave-segura")  # ← Asegúrate de tener esto
 app.config.from_object(config_by_name[os.getenv('FLASK_ENV', 'development')])
 swagger = Swagger(app)
 
@@ -51,6 +58,7 @@ conn.close()
 # 🔐 Proteger Swagger UI y JSON
 @app.before_request
 def proteger_swagger():
+    idioma = session.get('idioma', 'es')
     if request.path.startswith('/apidocs') or request.path.startswith('/apispec_1.json'):
         if 'usuario' not in session:
             return redirect('/login')
@@ -58,7 +66,8 @@ def proteger_swagger():
 @app.route('/home')
 @login_required
 def home():
-    return render_template('home.html', rol=session.get('rol'))
+    rol = session.get('rol', 'usuario')
+    return render_con_idioma('home.html', rol=rol)
 
 @app.route('/login', methods=['GET', 'POST'])
 @swag_from('swagger/login.yaml')
@@ -70,18 +79,27 @@ def login():
             session['usuario'] = usuario
             session['rol'] = obtener_rol(usuario)
             return redirect('/home')
-    return render_template('login.html')
+    return render_con_idioma('login.html')
 
 @app.route('/logout')
 def logout():
+    idioma = session.get('idioma', 'es')
+    t = traducciones.get(idioma, traducciones['es'])  # fallback por si falta el idioma
     session.clear()
     return redirect('/login')
 
 @app.route('/')
 @login_required
 def index():
-    activos = obtener_activos()
-    return render_template('index.html', activos=activos)
+    metricas = obtener_metricas()
+    return render_con_idioma('index.html', metricas=metricas, year=datetime.now().year)
+
+#@app.route('/')
+#@login_required
+#def index():
+#    activos = obtener_activos()
+#    year = datetime.now().year
+#    return render_template('index.html', activos=activos, year=year)
 
 @app.route('/agregar', methods=['POST'])
 @login_required
@@ -97,30 +115,36 @@ def agregar():
             fecha_alta=request.form['fecha_alta'],
             etiqueta=request.form.get('etiqueta', '')
         )
+        flash("Activo guardado exitosamente", "success")
         return redirect('/')
     except ValueError as e:
-        return render_template('error.html', mensaje=str(e)), 400
+        return render_con_idioma('error.html', mensaje=str(e)), 400
 
 @app.route('/dashboard')
 @login_required
 @swag_from('swagger/dashboard.yaml')
 def dashboard():
-    metricas = obtener_metricas()
-    return render_template('dashboard.html', metricas=metricas)
+    metricas = obtener_metricas()  # ← esta función debe existir y devolver un dict
+    activos = obtener_activos()
+    return render_con_idioma('dashboard.html', metricas=metricas, year=datetime.now().year)
 
-@app.route('/exportar')
+
+@app.route('/exportar', methods=['GET', 'POST'])
 @login_required
 @swag_from('swagger/exportar_excel.yaml')
 def exportar():
-    exportar_excel()
-    return redirect('/')
+    archivo_generado = None
+    if request.method == 'POST':
+        archivo_generado = exportar_excel()
+        flash("Exportación completada exitosamente", "success")
+    return render_con_idioma('exportar.html', archivo_generado=archivo_generado)
 
 @app.route('/restaurar')
 @login_required
 @swag_from('swagger/restaurar.yaml')
 def listar_backups():
     archivos = [f for f in os.listdir('backups') if f.endswith('.enc')]
-    return render_template('restaurar.html', archivos=archivos)
+    return render_con_idioma('restaurar.html', archivos=archivos)
 
 @app.route('/restaurar/<nombre>')
 @login_required
@@ -166,7 +190,7 @@ def ver_auditoria():
     registros = cursor.fetchall()
     conn.close()
 
-    return render_template('auditoria.html', registros=registros)
+    return render_con_idioma('auditoria.html', registros=registros)
 
 @app.route('/auditoria/exportar')
 @login_required
@@ -203,9 +227,10 @@ def exportar_pdf():
     path = generar_pdf()
     return send_file(path, as_attachment=True)
 
-@app.route('/ping', methods=['GET'])
-def ping():
-    return "Pong!", 200
+#@app.route('/ping', methods=['GET'])
+#def ping():
+#    idioma = session.get('idioma', 'es')
+#    return "Pong!", 200
 
 #Búsqueda en tiempo real
 @app.route("/buscar_activos")
@@ -220,6 +245,47 @@ def buscar_activos_route():
         } for r in resultados
     ])
 
+#Importar fecha a las vistas
+
+@app.context_processor
+def inject_year():
+    from datetime import datetime
+    return {'year': datetime.now().year}
+
+#Obtener Metricas
+def obtener_metricas():
+    conn = sqlite3.connect('data/inventario.db')
+    cursor = conn.cursor()
+
+    total = cursor.execute("SELECT COUNT(*) FROM activos").fetchone()[0]
+    confidenciales = cursor.execute("SELECT COUNT(*) FROM activos WHERE clasificacion = 'Confidencial'").fetchone()[0]
+    inactivos = cursor.execute("SELECT COUNT(*) FROM activos WHERE estado = 'Inactivo'").fetchone()[0]
+
+    conn.close()
+    return {
+        "Total de activos": total,
+        "Confidenciales": confidenciales,
+        "Inactivos": inactivos
+    }
+    
+#complemento para el cambio de idioma
+@app.route('/idioma/<lang>')
+def cambiar_idioma(lang):
+    if lang in ['es', 'en']:
+        session['idioma'] = lang
+    return redirect(request.referrer or '/home')
+ 
+#Idioma por defecto
+@app.before_request
+def establecer_idioma_por_defecto():
+    if 'idioma' not in session:
+        session['idioma'] = 'es'
+
+#Centralizador de inidioma
+def render_con_idioma(template, **kwargs):
+    idioma = session.get('idioma', 'es')
+    t = traducciones.get(idioma, traducciones['es'])
+    return render_template(template, t=t, **kwargs)
 
 
 

@@ -1,46 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Historial de Backups</title>
-  <style>
-    body { font-family: Arial; margin: 40px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-  </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}{{ t['audit'] }}{% endblock %}
+{% block content %}
+<h4 class="mb-3">{{ t['audit_history'] }}</h4>
 
-<h2>Historial de Auditoría</h2>
-<!-- filtros y tabla -->
-<p><a href="{{ url_for('home') }}">⬅️ Volver al inicio</a></p>
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">{{ t['filter_records'] }}</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>{{ t['date'] }}:</label>
+          <input type="date" name="fecha" class="form-control">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>{{ t['destination'] }}:</label>
+          <input type="text" name="destino" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">{{ t['filter'] }}</button>
+    </form>
+  </div>
+</div>
 
-  <h1>Auditoría de Envíos y Restauraciones</h1>
-  <p>
-  <a href="{{ url_for('exportar_auditoria') }}">📥 Exportar como CSV</a>
-</p>
-
-<form method="post">
-  <label>Filtrar por fecha:</label>
-  <input type="text" name="fecha" placeholder="2025-10">
-  <label>Filtrar por destino:</label>
-  <input type="text" name="destino" placeholder="correo, restauración">
-  <button type="submit">Filtrar</button>
-</form>
-
-  <table>
+<table class="table table-bordered table-hover">
+  <thead class="table-dark">
     <tr>
-      <th>Fecha</th>
-      <th>Archivo</th>
-      <th>Destino</th>
+      <th>{{ t['date'] }}</th>
+      <th>{{ t['file'] }}</th>
+      <th>{{ t['destination'] }}</th>
     </tr>
+  </thead>
+  <tbody>
     {% for fecha, archivo, destino in registros %}
-    <tr>
-      <td>{{ fecha }}</td>
-      <td>{{ archivo }}</td>
-      <td>{{ destino }}</td>
-    </tr>
+      <tr>
+        <td>{{ fecha }}</td>
+        <td>{{ archivo }}</td>
+        <td>{{ destino }}</td>
+      </tr>
     {% endfor %}
-  </table>
-</body>
-</html>
+  </tbody>
+</table>
+{% endblock %}

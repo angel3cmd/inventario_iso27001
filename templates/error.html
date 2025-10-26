@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Error</title>
-</head>
-<body>
-    <h2>Error al agregar activo</h2>
-    <p>{{ mensaje }}</p>
-    <a href="/">Volver al inicio</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}{{ t['error'] }}{% endblock %}
+{% block content %}
+<div class="alert alert-danger mt-4" role="alert">
+  <h4 class="alert-heading">{{ t['error'] }}</h4>
+  <p>{{ mensaje }}</p>
+  <hr>
+  <a href="/home" class="btn btn-outline-danger">{{ t['back_home'] }}</a>
+</div>
+{% endblock %}

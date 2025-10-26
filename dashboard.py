@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, session
+from utils.render import render_con_idioma
 from auth import login_required
 #Se cambia esta ruta
 #from models import obtener_activos # asegúrate de importar esta función
@@ -20,9 +21,9 @@ def obtener_metricas():
     sin_propietario = cursor.fetchone()[0]
     conn.close()
     return {
-        "total": total,
-        "confidencial": confidencial,
-        "sin_propietario": sin_propietario
+        "Total": total,
+        "Confidencial": confidencial,
+        "Sin Propietario": sin_propietario
     }
 
 
@@ -31,7 +32,7 @@ def obtener_metricas():
 def dashboard():
     metricas = obtener_metricas()
     activos = obtener_activos()
-    return render_template('dashboard.html', metricas=metricas, activos=activos)
+    return render_con_idioma('dashboard.html', metricas=metricas, activos=activos)
 
 
 __all__ = ['obtener_metricas', 'dashboard_blueprint']

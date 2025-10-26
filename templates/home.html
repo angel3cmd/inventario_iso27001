@@ -1,28 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Panel Principal</title>
-  <style>
-    body { font-family: Arial; margin: 40px; }
-    nav a { margin-right: 20px; text-decoration: none; color: #0077cc; }
-    nav { margin-bottom: 30px; }
-    .logout { float: right; }
-  </style>
-</head>
-<body>
-  <nav>
-    {% if rol in ['admin', 'operador'] %}
-      <a href="{{ url_for('index') }}">🏷️ Inventario</a>
-      <a href="{{ url_for('dashboard') }}">📊 Dashboard</a>
-      <a href="{{ url_for('listar_backups') }}">🔁 Restaurar</a>
-    {% endif %}
-    {% if rol in ['admin', 'auditor'] %}
-      <a href="{{ url_for('ver_auditoria') }}">🧾 Auditoría</a>
-    {% endif %}
-    <a href="{{ url_for('logout') }}" class="logout">🔓 Logout</a>
-  </nav>
-
-  <h1>Bienvenido, {{ session['usuario'] }} ({{ rol }})</h1>
-  <p>Selecciona una opción del menú para continuar.</p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}{{ t['home_title'] }}{% endblock %}
+{% block content %}
+  <h4>{{ t['welcome'] }}</h4>
+  <p>{{ t['role'] }}: <strong>{{ rol }}</strong></p>
+{% endblock %}

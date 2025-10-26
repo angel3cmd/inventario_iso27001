@@ -1,68 +1,100 @@
-<form method="POST" action="/agregar">
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <label>Nombre:</label>
-      <input name="nombre" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Tipo:</label>
-      <input name="tipo" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Propietario:</label>
-      <input name="propietario" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Ubicación:</label>
-      <input name="ubicacion" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Clasificación:</label>
-      <select name="clasificacion" class="form-control" required>
-        <option value="">-- Selecciona --</option>
-        <option>Confidencial</option>
-        <option>Interna</option>
-        <option>Pública</option>
-      </select>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Estado:</label>
-      <input name="estado" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Fecha Alta:</label>
-      <input name="fecha_alta" type="date" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-      <label>Etiqueta:</label>
-      <input name="etiqueta" class="form-control">
-    </div>
-  </div>
-  <button type="submit" class="btn btn-primary">Guardar</button>
-</form>
-<!--Búsqueda en tiempo real-->
+{% extends "base.html" %}
 
-<input type="text" id="busqueda" placeholder="Buscar por nombre, etiqueta o propietario">
-<table id="tabla-activos">
-  <!-- Aquí se renderizan los activos -->
-</table>
+{% block title %}{{ t['inventory_title'] }}{% endblock %}
 
-<script>
-  document.getElementById("busqueda").addEventListener("input", function () {
-    const query = this.value;
-    fetch(`/buscar_activos?query=${encodeURIComponent(query)}`)
-      .then(response => response.json())
-      .then(data => {
-        const tabla = document.getElementById("tabla-activos");
-        tabla.innerHTML = "";
-        data.forEach(activo => {
-          tabla.innerHTML += `
-            <tr>
-              <td>${activo.nombre}</td>
-              <td>${activo.etiqueta}</td>
-              <td>${activo.propietario}</td>
-            </tr>`;
+{% block content %}
+
+  <!-- 🔔 Alertas visuales -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ t['close'] }}"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- 📋 Formulario para agregar activo -->
+  <form method="POST" action="/agregar">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>{{ t['name'] }}:</label>
+        <input name="nombre" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['type'] }}:</label>
+        <input name="tipo" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['owner'] }}:</label>
+        <input name="propietario" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['location'] }}:</label>
+        <input name="ubicacion" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['classification'] }}:</label>
+        <select name="clasificacion" class="form-control" required>
+  <option value="">-- {{ t['select'] }} --</option>
+  <option value="Confidencial">{{ t['confidential'] }}</option>
+  <option value="Interna">{{ t['internal'] }}</option>
+  <option value="Pública">{{ t['public'] }}</option>
+</select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['status'] }}:</label>
+        <input name="estado" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['date_added'] }}:</label>
+        <input name="fecha_alta" type="date" class="form-control" required>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>{{ t['tag'] }}:</label>
+        <input name="etiqueta" class="form-control">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ t['save'] }}</button>
+  </form>
+
+  <hr>
+
+  <!-- 🔍 Búsqueda en tiempo real -->
+  <input type="text" id="busqueda" placeholder="{{ t['search_placeholder'] }}" class="form-control mb-3">
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>{{ t['name'] }}</th>
+        <th>{{ t['tag'] }}</th>
+        <th>{{ t['owner'] }}</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-activos">
+      <!-- Aquí se renderizan los resultados -->
+    </tbody>
+  </table>
+
+  <script>
+    document.getElementById("busqueda").addEventListener("input", function () {
+      const query = this.value;
+      fetch(`/buscar_activos?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          const tabla = document.getElementById("tabla-activos");
+          tabla.innerHTML = "";
+          data.forEach(activo => {
+            tabla.innerHTML += `
+              <tr>
+                <td>${activo.nombre}</td>
+                <td>${activo.etiqueta}</td>
+                <td>${activo.propietario}</td>
+              </tr>`;
+          });
         });
-      });
-  });
-</script>
+    });
+  </script>
+
+{% endblock %}

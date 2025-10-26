@@ -49,3 +49,7 @@ def buscar_activos(query=""):
     resultados = cursor.fetchall()
     conn.close()
     return resultados
+
+    # Guardar activo en la base de datos...
+    #flash("Activo guardado exitosamente", "success")
+    #return redirect(url_for("index"))

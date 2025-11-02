@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ t['audit'] }}{% endblock %}
+{% block content %}
+<h4 class="mb-3">{{ t['audit_history'] }}</h4>
+
+<div class="card mb-4">
+  <div class="card-header bg-secondary text-white">{{ t['filter_records'] }}</div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>{{ t['date'] }}:</label>
+          <input type="date" name="fecha" class="form-control">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>{{ t['destination'] }}:</label>
+          <input type="text" name="destino" class="form-control">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">{{ t['filter'] }}</button>
+    </form>
+  </div>
+</div>
+
+<table class="table table-bordered table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>{{ t['date'] }}</th>
+      <th>{{ t['file'] }}</th>
+      <th>{{ t['destination'] }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fecha, archivo, destino in registros %}
+      <tr>
+        <td>{{ fecha }}</td>
+        <td>{{ archivo }}</td>
+        <td>{{ destino }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

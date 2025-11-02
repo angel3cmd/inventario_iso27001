@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ t['activos'] }}</h2>
+
+<form method="get" action="/activos/buscar" class="mb-3">
+  <input type="text" name="q" placeholder="Buscar activo..." class="form-control">
+</form>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre</th><th>Tipo</th><th>Propietario</th><th>Ubicación</th><th>Clasificación</th><th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for activo in activos %}
+    <tr>
+      <td>{{ activo[1] }}</td>
+      <td>{{ activo[2] }}</td>
+      <td>{{ activo[3] }}</td>
+      <td>{{ activo[4] }}</td>
+      <td>{{ activo[5] }}</td>
+      <td>{{ activo[6] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

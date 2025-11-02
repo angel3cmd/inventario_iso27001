@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ t['integraciones'] }}{% endblock %}
+
+{% block content %}
+<h2>{{ t['integraciones'] }}</h2>
+<table>
+  <thead>
+    <tr>
+      <th>{{ t['nombre'] }}</th>
+      <th>{{ t['tipo'] }}</th>
+      <th>{{ t['estado'] }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in integraciones %}
+    <tr>
+      <td>{{ item['nombre'] }}</td>
+      <td>{{ item['tipo'] }}</td>
+      <td>{{ item['estado'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+
+
+  <a href="/integraciones">Todas</a> |
+<a href="/integraciones/REST">REST</a> |
+<a href="/integraciones/Autenticación">Autenticación</a> |
+<a href="/integraciones/Push">Push</a>
+
+
+</table>
+{% endblock %}

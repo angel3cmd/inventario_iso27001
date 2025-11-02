@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ t['validacion_iso'] }}{% endblock %}
+
+{% block content %}
+<h2>{{ t['validacion_iso'] }}</h2>
+
+{% if errores %}
+  <ul class="list-group">
+    {% for e in errores %}
+      <li class="list-group-item list-group-item-danger">{{ e }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="alert alert-success" role="alert">
+    ✅ No se encontraron errores. Todo está conforme con ISO 27001.
+  </div>
+{% endif %}
+{% endblock %}

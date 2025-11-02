@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ t['configuracion'] }}{% endblock %}
+
+{% block content %}
+<h2>{{ t['configuracion'] }}</h2>
+<table>
+  <thead>
+    <tr>
+      <th>{{ t['clave'] }}</th>
+      <th>{{ t['valor'] }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in configuracion %}
+    <tr>
+      <td>{{ item['clave'] }}</td>
+      <td>{{ item['valor'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

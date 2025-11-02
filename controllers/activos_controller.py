@@ -1,55 +1,66 @@
-import sqlite3
+from flask import Blueprint, request, redirect, flash
+from models_cmdb import agregar_activo as guardar_activo, obtener_activos, buscar_activos
+from utils.render import render_con_idioma
+from auth import login_required
+from db import get_db
 
-def agregar_activo(nombre, tipo, propietario, ubicacion, clasificacion, estado, fecha_alta, etiqueta):
-    # Validar clasificación
-    if clasificacion not in ['Confidencial', 'Interna', 'Pública']:
-        raise ValueError("Clasificación inválida según ISO 27001")
+activos_blueprint = Blueprint('activos', __name__)
 
-    # Validar campos obligatorios
-    campos = {
-        'nombre': nombre,
-        'tipo': tipo,
-        'propietario': propietario,
-        'ubicacion': ubicacion,
-        'clasificacion': clasificacion,
-        'estado': estado,
-        'fecha_alta': fecha_alta
-    }
-    faltantes = [campo for campo, valor in campos.items() if not valor]
-    if faltantes:
-        raise ValueError(f"Faltan campos obligatorios: {', '.join(faltantes)}")
+@activos_blueprint.route('/activos')
+@login_required
+def listar_activos():
+    activos = obtener_activos()
+    return render_con_idioma('activos.html', activos=activos)
 
-    # Insertar en la base de datos
-    conn = sqlite3.connect('data/inventario.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO activos (nombre, tipo, propietario, ubicacion, clasificacion, estado, fecha_alta, etiqueta)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (nombre, tipo, propietario, ubicacion, clasificacion, estado, fecha_alta, etiqueta))
-    conn.commit()
-    conn.close()
+@activos_blueprint.route('/activos/agregar', methods=['POST'])
+@login_required
+def crear_activo():
+    datos = request.form
+    try:
+        guardar_activo(
+            datos['nombre'], datos['tipo'], datos['propietario'],
+            datos['ubicacion'], datos['clasificacion'], datos['estado'],
+            datos['fecha_alta'], datos.get('etiqueta', '')
+        )
+        flash("Activo guardado exitosamente", "success")
+    except ValueError as e:
+        flash(str(e), "danger")
+    return redirect('/activos')
 
-def obtener_activos():
-    conn = sqlite3.connect('data/inventario.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM activos')
-    activos = cursor.fetchall()
-    conn.close()
-    return activos
+@activos_blueprint.route('/activos/buscar')
+@login_required
+def buscar():
+    criterio = request.args.get('q', '')
+    resultados = buscar_activos(criterio)
+    return render_con_idioma('activos.html', activos=resultados)
+@activos_blueprint.route('/activos/validacion_iso')
+@login_required
+def validacion_iso():
+    return render_con_idioma('validacion_iso.html')
+@activos_blueprint.route('/activos/generar_reporte_iso')
+@login_required
+def generar_reporte_iso():
+    return render_con_idioma('generar_reporte_iso.html')
+@activos_blueprint.route('/activos/auditoria_nueva')
+@login_required
+def auditoria_nueva():
+    return render_con_idioma('auditoria_nueva.html')        
 
-import sqlite3
+@activos_blueprint.route('/agregar_relacion', methods=['GET', 'POST'])
+@login_required
+def agregar_relacion():
+    db = get_db()
+    if request.method == 'POST':
+        activo_id = request.form['activo_id']
+        ci_relacionado_id = request.form['ci_relacionado_id']
+        tipo_relacion = request.form['tipo_relacion']
+        db.execute("""
+            INSERT INTO relaciones_ci (activo_id, ci_relacionado_id, tipo_relacion)
+            VALUES (?, ?, ?)
+        """, (activo_id, ci_relacionado_id, tipo_relacion))
+        db.commit()
+        return redirect('/dashboard')
 
-def buscar_activos(query=""):
-    conn = sqlite3.connect("data/inventario.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT nombre, etiqueta, propietario FROM activos
-        WHERE nombre LIKE ? OR etiqueta LIKE ? OR propietario LIKE ?
-    """, (f"%{query}%", f"%{query}%", f"%{query}%"))
-    resultados = cursor.fetchall()
-    conn.close()
-    return resultados
-
-    # Guardar activo en la base de datos...
-    #flash("Activo guardado exitosamente", "success")
-    #return redirect(url_for("index"))
+    activos = db.execute("SELECT id, nombre FROM activos").fetchall()
+    cis = db.execute("SELECT id, nombre FROM activos").fetchall()
+    return render_con_idioma('agregar_relacion.html', activos=activos, cis=cis)

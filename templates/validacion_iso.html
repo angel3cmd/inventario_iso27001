@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Errores ISO 27001{% endblock %}
+{% block content %}
+<h4 class="mb-3">Activos con errores de validación ISO 27001</h4>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Clasificación</th>
+      <th>Etiqueta</th>
+      <th>Propietario</th>
+      <th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for activo in activos_con_error %}
+    <tr>
+      <td>{{ activo.nombre }}</td>
+      <td>{{ activo.clasificacion or '❌' }}</td>
+      <td>{{ activo.etiqueta or '❌' }}</td>
+      <td>{{ activo.propietario }}</td>
+      <td>{{ activo.estado }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

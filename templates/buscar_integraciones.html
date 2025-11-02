@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Buscar Integraciones{% endblock %}
+{% block content %}
+<h2>{{ t['buscar_integraciones'] }}</h2>
+
+<!-- Filtros -->
+<label>{{ t['tipo'] }}:</label>
+<select id="tipo" onchange="buscarIntegraciones()">
+  <option value="">-- Todos --</option>
+  <option value="REST">REST</option>
+  <option value="Autenticación">Autenticación</option>
+  <option value="Push">Push</option>
+</select>
+
+<label>{{ t['estado'] }}:</label>
+<select id="estado" onchange="buscarIntegraciones()">
+  <option value="">-- Todos --</option>
+  <option value="Activa">Activa</option>
+  <option value="Inactiva">Inactiva</option>
+</select>
+
+<br><br>
+<table border="1" id="resultados">
+  <thead>
+    <tr>
+      <th>{{ t['nombre'] }}</th>
+      <th>{{ t['tipo'] }}</th>
+      <th>{{ t['estado'] }}</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+function buscarIntegraciones() {
+  const tipo = document.getElementById("tipo").value;
+  const estado = document.getElementById("estado").value;
+  const params = new URLSearchParams({ tipo, estado });
+  fetch(`/buscar_integraciones_avanzado?${params}`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.querySelector("#resultados tbody");
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.nombre}</td><td>${row.tipo}</td><td>${row.estado}</td>`;
+        tbody.appendChild(tr);
+      });
+    });
+}
+</script>
+{% endblock %}

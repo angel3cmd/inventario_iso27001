@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t['activos'] }}{% endblock %}
+
+{% block content %}
+<h2>{{ t['activos'] }}</h2>
+
+<!-- Filtros por tipo -->
+<div style="margin-bottom: 1em;">
+  <strong>{{ t['filtrar_por_tipo'] }}:</strong>
+  <a href="/activos">{{ t['todos'] }}</a> |
+  <a href="/activos/Hardware">{{ t['hardware'] }}</a> |
+  <a href="/activos/Red">{{ t['red'] }}</a> |
+  <a href="/activos/Software">{{ t['software'] }}</a>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>{{ t['nombre'] }}</th>
+      <th>{{ t['tipo'] }}</th>
+      <th>{{ t['propietario'] }}</th>
+      <th>{{ t['ubicacion'] }}</th>
+      <th>{{ t['clasificacion'] }}</th>
+      <th>{{ t['estado'] }}</th>
+      <th>{{ t['etiqueta'] }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in activos %}
+    <tr>
+      <td>{{ a.id }}</td>
+      <td>{{ a.nombre }}</td>
+      <td>{{ a.tipo }}</td>
+      <td>{{ a.propietario }}</td>
+      <td>{{ a.ubicacion }}</td>
+      <td>{{ a.clasificacion }}</td>
+      <td>{{ a.estado }}</td>
+      <td>{{ a.etiqueta }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

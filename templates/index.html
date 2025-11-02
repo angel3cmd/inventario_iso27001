@@ -97,4 +97,23 @@
     });
   </script>
 
+{% if metricas.errores_iso > 0 %}
+<div class="alert alert-warning">
+  ⚠️ {{ metricas.errores_iso }} activos presentan errores de validación ISO 27001.
+  <a href="/validacion_iso" class="btn btn-sm btn-warning ms-2">{{ t['ver_detalles'] }}</a>
+</div>
+{% endif %}
+
+
+<ul>
+  <li><strong>{{ t['total_activos'] }}:</strong> {{ metricas.total_activos }}</li>
+  <li><strong>{{ t['total_integraciones'] }}:</strong> {{ metricas.total_integraciones }}</li>
+  <li><strong>{{ t['total_relaciones'] }}:</strong> {{ metricas.total_relaciones }}</li>
+</ul>
+<h3>{{ t['acciones_rapidas'] }}</h3>
+<ul>
+  <li><a href="/validacion_iso">{{ t['validacion_iso'] }}</a></li>
+</ul>
+
+
 {% endblock %}

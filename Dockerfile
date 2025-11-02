@@ -15,7 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 📁 Copiar el resto del proyecto
 COPY . .
 
-# 🔥 Exponer el puerto Flask
+# 🧱 Ejecutar script de inicialización
+RUN python init_db.py
+
 EXPOSE 5000
 
 # 🚀 Comando de inicio

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ t['relaciones_ci'] }}</h2>
+
+<form method="post" action="/relaciones/agregar" class="mb-4">
+  <div class="row">
+    <div class="col-md-3"><input name="origen_tipo" class="form-control" placeholder="Origen (ej. equipo)"></div>
+    <div class="col-md-2"><input name="origen_id" class="form-control" placeholder="ID origen"></div>
+    <div class="col-md-3"><input name="destino_tipo" class="form-control" placeholder="Destino (ej. usuario)"></div>
+    <div class="col-md-2"><input name="destino_id" class="form-control" placeholder="ID destino"></div>
+    <div class="col-md-2"><input name="tipo_relacion" class="form-control" placeholder="Tipo (ej. asignado_a)"></div>
+  </div>
+  <input name="descripcion" class="form-control mt-2" placeholder="Descripción (opcional)">
+  <button class="btn btn-primary mt-2">Crear relación</button>
+</form>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Origen</th><th>ID</th><th>Destino</th><th>ID</th><th>Tipo</th><th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in relaciones %}
+    <tr>
+      <td>{{ r[1] }}</td><td>{{ r[2] }}</td>
+      <td>{{ r[3] }}</td><td>{{ r[4] }}</td>
+      <td>{{ r[5] }}</td><td>{{ r[6] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

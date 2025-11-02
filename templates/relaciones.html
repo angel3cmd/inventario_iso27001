@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Relaciones{% endblock %}
+{% block content %}
+<h2>Relaciones entre elementos de configuración</h2>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Origen</th>
+    <th>Destino</th>
+    <th>Tipo</th>
+    <th>Descripción</th>
+  </tr>
+  {% for r in relaciones %}
+  <tr>
+    <td>{{ r.id }}</td>
+    <td>{{ r.origen_tipo }} #{{ r.origen_id }} — {{ r.origen_nombre }}</td>
+    <td>{{ r.destino_tipo }} #{{ r.destino_id }} — {{ r.destino_nombre }}</td>
+    <td>{{ r.tipo_relacion }}</td>
+    <td>{{ r.descripcion }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Agregar activo{% endblock %}
+{% block content %}
+<h4 class="mb-3">Agregar nuevo activo</h4>
+<form method="POST" action="/agregar">
+  <div class="row">
+    {% for campo in [
+      ('nombre', 'Nombre'),
+      ('tipo', 'Tipo'),
+      ('propietario', 'Propietario'),
+      ('ubicacion', 'Ubicación'),
+      ('clasificacion', 'Clasificación'),
+      ('estado', 'Estado'),
+      ('fecha_alta', 'Fecha de alta'),
+      ('etiqueta', 'Etiqueta')
+    ] %}
+    <div class="col-md-6 mb-3">
+      <label for="{{ campo[0] }}">{{ campo[1] }}</label>
+      {% if campo[0] == 'clasificacion' %}
+        <select class="form-control" name="clasificacion" required>
+          <option value="Confidencial">Confidencial</option>
+          <option value="Interno">Interno</option>
+          <option value="Personal">Personal</option>
+        </select>
+      {% elif campo[0] == 'estado' %}
+        <select class="form-control" name="estado" required>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+          <option value="En mantenimiento">En mantenimiento</option>
+        </select>
+      {% elif campo[0] == 'fecha_alta' %}
+        <input type="date" class="form-control" name="fecha_alta" required>
+      {% else %}
+        <input type="text" class="form-control" name="{{ campo[0] }}" required>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar activo</button>
+</form>
+{% endblock %}

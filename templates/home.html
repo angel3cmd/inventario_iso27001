@@ -5,6 +5,7 @@
   <h4>{{ t['welcome'] }}</h4>
   <p>{{ t['role'] }}: <strong>{{ rol }}</strong></p>
 
+  <!--Secciones principales-->
   <a href="/activos" class="btn btn-outline-primary w-100 mb-3">{{ t['activos'] }}</a>
   <a href="/usuarios" class="btn btn-outline-primary w-100 mb-3">{{ t['usuarios'] }}</a>
   <a href="/configuracion" class="btn btn-outline-primary w-100 mb-3">{{ t['configuracion'] }}</a>
@@ -12,13 +13,15 @@
   <a href="/reportes" class="btn btn-outline-primary w-100 mb-3">{{ t['reportes'] }}</a>
   <a href="/auditorias" class="btn btn-outline-primary w-100 mb-3">{{ t['auditorias'] }}</a>
   <a href="/integraciones" class="btn btn-outline-primary w-100 mb-3">{{ t['integraciones'] }}</a>
-  <a href="/buscar_integraciones" class="btn btn-outline-primary w-100 mb-3">{{ t['buscar_integraciones'] }}</a>
-  <a href="/buscar_relaciones" class="btn btn-outline-primary w-100 mb-3">{{ t['buscar_relaciones'] }}</a>
   
+  <!--Acciones rápidas-->
+  <a href="/agregar" class="btn btn-success w-100 mb-3">➕ {{ t['agregar_activo_title'] }}</a>
+  <a href="/agregar_relacion" class="btn btn-secondary w-100 mb-3">🔗 {{ t['agregar_relacion_title'] }}</a>
+  <a href="/validacion_iso" class="btn btn-warning w-100 mb-3">⚠️ {{ t['validacion_iso_title'] }}</a>
 
-
-  <a href="/agregar" class="btn btn-success">➕ Agregar activo</a>
-  <a href="/agregar_relacion" class="btn btn-secondary">🔗 Relacionar CI</a>
-  <a href="/validacion_iso" class="btn btn-warning">⚠️ Validación ISO</a>
+  <!--Acciones de usuario-->
+  <a href="/asignar_activo" class="btn btn-info w-100 mb-3">📎 {{ t['asignar_activo_title'] }}</a>
+  <a href="/usuario/{{ session['usuario_id'] }}/activos" class="btn btn-light w-100 mb-3">📋 {{ t['ver_activos_asignados'] }}</a>
+  <a href="/registrar_usuario" class="btn btn-primary w-100 mb-3">➕ {{ t['registrar_usuario_title'] }}</a>
 
 {% endblock %}

@@ -3,6 +3,14 @@ from models_cmdb import agregar_activo as guardar_activo, obtener_activos, busca
 from utils.render import render_con_idioma
 from auth import login_required
 from db import get_db
+from datetime import datetime
+from models_cmdb import (
+    asignar_activo_a_usuario,
+    liberar_activo,
+    obtener_activos_disponibles,
+    obtener_activos_asignados_a_usuario,
+    obtener_historial_asignaciones_activo
+)
 
 activos_blueprint = Blueprint('activos', __name__)
 
@@ -33,14 +41,17 @@ def buscar():
     criterio = request.args.get('q', '')
     resultados = buscar_activos(criterio)
     return render_con_idioma('activos.html', activos=resultados)
+
 @activos_blueprint.route('/activos/validacion_iso')
 @login_required
 def validacion_iso():
     return render_con_idioma('validacion_iso.html')
+
 @activos_blueprint.route('/activos/generar_reporte_iso')
 @login_required
 def generar_reporte_iso():
     return render_con_idioma('generar_reporte_iso.html')
+
 @activos_blueprint.route('/activos/auditoria_nueva')
 @login_required
 def auditoria_nueva():
@@ -64,3 +75,41 @@ def agregar_relacion():
     activos = db.execute("SELECT id, nombre FROM activos").fetchall()
     cis = db.execute("SELECT id, nombre FROM activos").fetchall()
     return render_con_idioma('agregar_relacion.html', activos=activos, cis=cis)
+
+@activos_blueprint.route('/asignar_activo', methods=['GET', 'POST'])
+@login_required
+def asignar_activo():
+    db = get_db()
+    if request.method == 'POST':
+        try:
+            activo_id = request.form['activo_id']
+            usuario_id = request.form['usuario_id']
+            fecha_asignacion = request.form['fecha_asignacion']
+            observaciones = request.form.get('observaciones', '')
+            asignar_activo_a_usuario(activo_id, usuario_id, fecha_asignacion, observaciones)
+            flash("Activo asignado correctamente", "success")
+            return redirect('/dashboard')
+        except ValueError as e:
+            flash(str(e), "danger")
+
+    activos = obtener_activos_disponibles()
+    usuarios = db.execute("SELECT id, nombre FROM usuarios").fetchall()
+    return render_con_idioma('asignar_activo.html', activos=activos, usuarios=usuarios)
+
+@activos_blueprint.route('/usuario/<int:usuario_id>/activos')
+@login_required
+def activos_asignados(usuario_id):
+    activos = obtener_activos_asignados_a_usuario(usuario_id)
+    usuario = get_db().execute("SELECT nombre FROM usuarios WHERE id = ?", (usuario_id,)).fetchone()
+    return render_con_idioma('activos_asignados.html', activos=activos, usuario=usuario)
+
+@activos_blueprint.route('/liberar_activo/<int:activo_id>', methods=['POST'])
+@login_required
+def liberar_activo_view(activo_id):
+    try:
+        fecha_liberacion = datetime.now().strftime('%Y-%m-%d')
+        liberar_activo(activo_id, fecha_liberacion)
+        flash("Activo liberado correctamente", "success")
+    except ValueError as e:
+        flash(str(e), "danger")
+    return redirect('/dashboard')  # o a donde prefieras redirigir

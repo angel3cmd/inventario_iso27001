@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">📋 Activos asignados a {{ usuario['nombre'] }}</h2>
+
+{% if activos %}
+  {% for activo in activos %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ activo['nombre'] }}</h5>
+        <p class="card-text">
+          Tipo: {{ activo['tipo'] }}<br>
+          Estado: {{ activo['estado'] }}<br>
+          Serie: {{ activo['numero_serie'] }}
+        </p>
+        <form method="POST" action="/liberar_activo/{{ activo['id'] }}" style="display:inline;" onsubmit="return confirmarLiberacion()">
+           <button type="submit" class="btn btn-danger">Liberar</button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="alert alert-info">
+    <p>No hay activos asignados.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

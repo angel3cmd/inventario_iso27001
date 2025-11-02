@@ -15,9 +15,11 @@ CREATE TABLE IF NOT EXISTS activos (
 CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario TEXT UNIQUE NOT NULL,
+    nombre TEXT NOT NULL,
     clave TEXT NOT NULL,
     rol TEXT NOT NULL
 );
+
 
 -- Tabla de auditoría de envíos
 CREATE TABLE IF NOT EXISTS auditoria_envios (
@@ -59,6 +61,19 @@ CREATE TABLE IF NOT EXISTS integraciones (
     tipo TEXT NOT NULL,
     estado TEXT NOT NULL
 );
+
+-- Tabla de asignaciones de activos a usuarios
+CREATE TABLE IF NOT EXISTS asignaciones_activos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activo_id INTEGER NOT NULL,
+    usuario_id INTEGER NOT NULL,
+    fecha_asignacion TEXT NOT NULL,
+    fecha_liberacion TEXT,
+    observaciones TEXT,
+    FOREIGN KEY (activo_id) REFERENCES activos(id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
 
 -- Índices para mejorar el rendimiento de las consultas
 CREATE INDEX IF NOT EXISTS idx_activos_tipo ON activos(tipo);

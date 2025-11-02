@@ -1,0 +1,10 @@
+<!-- templates/auditorias.html -->
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t['titulo_auditorias'] }}</h1>
+<ul>
+  {% for item in auditorias %}
+    <li>{{ item['fecha'] }} - {{ item['archivo'] }} → {{ item['destino'] }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

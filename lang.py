@@ -192,6 +192,11 @@ traducciones = {
         "eliminar_activo": "Eliminar Activo",
         "generar_reporte_iso": "Generar reporte ISO",
         "nueva_auditoria": "Nueva auditoría",
-        
+        "agregar_activo_title": "Agregar activo",
+        "agregar_relacion_title": "Agregar relación CI",
+        "validacion_iso_title": "Validación ISO 27001",
+        "asignar_activo_title": "Asignar activo a usuario",
+        "ver_activos_asignados": "Ver activos asignados",
+        "registrar_usuario_title": "Registrar nuevo usuario"
     }
 }

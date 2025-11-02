@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <meta charset="UTF-8">
+  <title>{% block title %}Inventario ISO 27001{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="container mt-4">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Inventario ISO 27001</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Inventario</a></li>
+        <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+        {% if session.get('rol') == 'admin' %}
+          <li class="nav-item"><a class="nav-link" href="/auditoria">Auditoría</a></li>
+          <li class="nav-item"><a class="nav-link" href="/restaurar">Restaurar</a></li>
+          <li class="nav-item"><a class="nav-link" href="/exportar">Exportar</a></li>
+        {% endif %}
+        
+        <li class="nav-item"><a class="nav-link" href="/logout">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </div>
+  <!--Tema oscuro-->
+  <li class="nav-item">
+  <button id="toggle-tema" class="btn btn-sm btn-outline-light ms-2">🌙</button>
+</li>
+
+<!--Cambio de idioma-->
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">🌐 Idioma</a>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><a class="dropdown-item" href="/idioma/es">Español</a></li>
+    <li><a class="dropdown-item" href="/idioma/en">English</a></li>
+  </ul>
+</li>
+</nav>
+
+
+  <!-- Alertas -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Contenido dinámico -->
+  {% block content %}{% endblock %}
+
+ <footer class="mt-5 pt-3 border-top text-center text-muted small">
+  <p class="mb-0">Sistema de Inventario ISO 27001 &copy; {{ year }} — Desarrollado por Miguel</p>
+</footer>
+
+<!--Botón flotante-->
+<a href="/home" class="btn btn-secondary btn-lg rounded-circle shadow" id="boton-inicio" title="Ir al inicio">
+  <i class="bi bi-house-door-fill"></i>
+</a>
+
+<style>
+  #boton-inicio {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+</style>
+
+<!--Bo´ton de modo oscuro-->
+<script>
+  const temaActual = localStorage.getItem("tema") || "claro";
+  document.body.classList.toggle("tema-oscuro", temaActual === "oscuro");
+
+  document.getElementById("toggle-tema").addEventListener("click", () => {
+    document.body.classList.toggle("tema-oscuro");
+    const nuevoTema = document.body.classList.contains("tema-oscuro") ? "oscuro" : "claro";
+    localStorage.setItem("tema", nuevoTema);
+  });
+</script>
+
+<style>
+  .tema-oscuro {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+  .tema-oscuro .navbar {
+    background-color: #1f1f1f;
+  }
+  .tema-oscuro .card,
+  .tema-oscuro .table {
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+  }
+</style>
+
+<script>
+  function confirmarLiberacion() {
+    return confirm("¿Estás seguro de que deseas liberar este activo?");
+  }
+</script>
+
+</body>
+</html>

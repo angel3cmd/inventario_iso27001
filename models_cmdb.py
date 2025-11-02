@@ -66,3 +66,102 @@ def agregar_relacion_ci(origen_tipo, origen_id, destino_tipo, destino_id, tipo_r
 def obtener_relaciones_ci():
     db = get_db()
     return db.execute("SELECT * FROM relaciones_ci").fetchall()
+
+# 🛠️ Asignar y liberar activos
+
+def asignar_activo_a_usuario(activo_id, usuario_id, fecha_asignacion, observaciones=""):
+    db = get_db()
+
+    asignado = db.execute("""
+        SELECT * FROM asignaciones_activos
+        WHERE activo_id = ? AND fecha_liberacion IS NULL
+    """, (activo_id,)).fetchone()
+
+    if asignado:
+        raise ValueError("Este activo ya está asignado")
+
+    db.execute("""
+        INSERT INTO asignaciones_activos (activo_id, usuario_id, fecha_asignacion, observaciones)
+        VALUES (?, ?, ?, ?)
+    """, (activo_id, usuario_id, fecha_asignacion, observaciones))
+    db.commit()
+
+def liberar_activo(activo_id, fecha_liberacion):
+    db = get_db()
+
+    asignacion = db.execute("""
+        SELECT * FROM asignaciones_activos
+        WHERE activo_id = ? AND fecha_liberacion IS NULL
+    """, (activo_id,)).fetchone()
+
+    if not asignacion:
+        raise ValueError("Este activo no está asignado actualmente")
+
+    db.execute("""
+        UPDATE asignaciones_activos
+        SET fecha_liberacion = ?
+        WHERE id = ?
+    """, (fecha_liberacion, asignacion['id']))
+    db.commit()
+
+def obtener_asignaciones_activos():
+    db = get_db()
+    return db.execute("SELECT * FROM asignaciones_activos").fetchall()
+
+def obtener_asignacion_activo(activo_id):
+    db = get_db()
+    return db.execute("""
+        SELECT * FROM asignaciones_activos
+        WHERE activo_id = ? AND fecha_liberacion IS NULL
+    """, (activo_id,)).fetchone()
+
+def obtener_activo_por_id(activo_id):
+    db = get_db()
+    return db.execute("SELECT * FROM activos WHERE id = ?", (activo_id,)).fetchone()
+
+def obtener_activos_disponibles():
+    db = get_db()
+    return db.execute("""
+        SELECT * FROM activos
+        WHERE id NOT IN (
+            SELECT activo_id FROM asignaciones_activos
+            WHERE fecha_liberacion IS NULL
+        )
+    """).fetchall()
+
+def liberar_activo(activo_id, fecha_liberacion):
+    db = get_db()
+
+    asignacion = db.execute("""
+        SELECT * FROM asignaciones_activos
+        WHERE activo_id = ? AND fecha_liberacion IS NULL
+    """, (activo_id,)).fetchone()
+
+    if not asignacion:
+        raise ValueError("Este activo no está asignado actualmente")
+
+    db.execute("""
+        UPDATE asignaciones_activos
+        SET fecha_liberacion = ?
+        WHERE id = ?
+    """, (fecha_liberacion, asignacion['id']))
+    db.commit()
+
+def obtener_activos_asignados_a_usuario(usuario_id):
+    db = get_db()
+    return db.execute("""
+        SELECT a.*, aa.fecha_asignacion
+        FROM activos a
+        JOIN asignaciones_activos aa ON a.id = aa.activo_id
+        WHERE aa.usuario_id = ? AND aa.fecha_liberacion IS NULL
+    """, (usuario_id,)).fetchall()
+
+def obtener_historial_asignaciones_activo(activo_id):
+    db = get_db()
+    return db.execute("""
+        SELECT aa.*, u.nombre AS usuario_nombre
+        FROM asignaciones_activos aa
+        JOIN usuarios u ON aa.usuario_id = u.id
+        WHERE aa.activo_id = ?
+        ORDER BY fecha_asignacion DESC
+    """, (activo_id,)).fetchall()

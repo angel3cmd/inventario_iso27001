@@ -2,6 +2,9 @@ import os
 import csv
 import hashlib
 import sqlite3
+from flask import Flask, render_template, request, redirect, session, send_file, Response, jsonify, flash, url_for
+import datetime
+
 from io import StringIO
 from datetime import datetime
 from dotenv import load_dotenv
@@ -24,14 +27,9 @@ from models_cmdb import agregar_activo
 from utils.render import render_con_idioma
 from db import get_db
 #from dashboard import obtener_metricas, dashboard_blueprint
-from flask import Flask, render_template, request, redirect, session, send_file, Response, jsonify, flash, url_for
 from controllers.activos_controller import activos_blueprint
 from auth import login_required, autenticar, es_admin, obtener_rol, auth_blueprint
 from dashboard import obtener_metricas, dashboard_blueprint
-
-
-
-
 from flask import Flask, render_template
 
 # 🗂️ Crear carpetas persistentes si no existen
@@ -43,6 +41,9 @@ load_dotenv()
 #app = Flask(__name__)
 #Para que agregue todo desde base
 app = Flask(__name__, template_folder='templates')
+
+app.jinja_env.globals.update(now=datetime.now)
+
 app.secret_key = os.getenv("SECRET_KEY", "clave-segura")  # ← Asegúrate de tener esto
 app.config.from_object(config_by_name[os.getenv('FLASK_ENV', 'development')])
 swagger = Swagger(app)
@@ -79,8 +80,12 @@ def proteger_swagger():
 @app.route('/home')
 @login_required
 def home():
+    db = get_db()
+    usuario_id = session.get('usuario_id')
+    usuario = db.execute("SELECT id, nombre FROM usuarios WHERE id = ?", (usuario_id,)).fetchone()
+    
     rol = session.get('rol', 'usuario')
-    return render_con_idioma('home.html', rol=rol)
+    return render_con_idioma('home.html', rol=rol, usuario=usuario)
 
 @app.route('/login', methods=['GET', 'POST'])
 @swag_from('swagger/login.yaml')
@@ -104,6 +109,13 @@ def logout():
 @app.route('/')
 @login_required
 def dashboard_view():
+    db = get_db()
+    usuario_id = session.get("usuario_id")
+
+    # Obtener datos del usuario
+    usuario = db.execute("SELECT id, nombre FROM usuarios WHERE id = ?", (usuario_id,)).fetchone()
+
+    # Obtener rol y métricas
     rol = session.get("rol", "Invitado")
     metricas = obtener_metricas()
     errores_iso = metricas.get("errores_iso", 0)
@@ -111,7 +123,8 @@ def dashboard_view():
     return render_con_idioma('home.html',
         rol=rol,
         metricas=metricas,
-        errores_iso=errores_iso)
+        errores_iso=errores_iso,
+        usuario=usuario)
 
 @app.route('/agregar', methods=['GET', 'POST'])
 @login_required

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Asignar activo{% endblock %}
+{% block content %}
+<h4>Asignar activo a usuario</h4>
+<form method="POST">
+  <div class="mb-3">
+    <label for="activo_id">Activo disponible</label>
+    <select name="activo_id" class="form-control" required>
+      {% for activo in activos %}
+        <option value="{{ activo['id'] }}">{{ activo['nombre'] }} ({{ activo['tipo'] }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="usuario_id">Usuario</label>
+    <select name="usuario_id" class="form-control" required>
+      {% for usuario in usuarios %}
+        <option value="{{ usuario['id'] }}">{{ usuario['nombre'] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="fecha_asignacion">Fecha de asignación</label>
+    <input type="date" name="fecha_asignacion" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label for="observaciones">Observaciones</label>
+    <textarea name="observaciones" class="form-control"></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Asignar activo</button>
+</form>
+{% endblock %}

@@ -51,8 +51,8 @@ else:
 
 # Insertar datos simulados
 try:
-    cursor.execute("INSERT INTO usuarios (usuario, clave, rol) VALUES (?, ?, ?)",
-                   ("admin", "admin123", "Administrador"))
+    cursor.execute("INSERT INTO usuarios (usuario, nombre, clave, rol) VALUES (?, ?, ?, ?)",
+               ("admin", "Administrador General", "admin123", "admin"))
     cursor.execute("INSERT INTO configuracion (clave, valor) VALUES (?, ?)", ("idioma", "es"))
     cursor.execute("INSERT INTO configuracion (clave, valor) VALUES (?, ?)", ("tema", "oscuro"))
     cursor.execute("""

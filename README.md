@@ -1,23 +1,23 @@
-# Inventario ISO 27001 — Sistema de Auditoría y Restauración
+## ISO 27001 Inventory — Audit and Restoration System
 
-Aplicación web desarrollada en Flask para gestionar activos de TI conforme a estándares de seguridad y trazabilidad. Incluye autenticación por roles, backups cifrados, restauración web, exportación segura y documentación protegida.
-
----
-
-## Funcionalidades principales
-
-- Autenticación con roles (admin, auditor, operador)
-- Gestión de activos con carga, edición y visualización
-- Restauración de backups cifrados `.xlsx.enc`
-- Registro de auditoría con fecha, archivo y destino
-- Dashboard con métricas de inventario
-- Exportación de auditoría como CSV (con firma SHA256) y PDF profesional
-- Filtros por fecha y destino en la vista de auditoría
-- Logout y navegación segura
+A Flask-based web application designed to manage IT assets in compliance with ISO 27001 security and traceability standards. It includes role-based authentication, encrypted backups, web-based restoration, secure export options, and protected documentation.
 
 ---
 
-## Estructura del proyecto
+## Key Features
+
+- Role-based authentication (admin, auditor, operator)
+- Asset management with upload, edit, and visualization
+- Restoration of encrypted `.xlsx.enc` backups
+- Audit logging with date, file, and destination
+- Inventory dashboard with metrics
+- Audit export as CSV (with SHA256 signature) and professional PDF
+- Filters by date and destination in the audit view
+- Secure logout and navigation
+
+---
+
+## Project Structure
 
 inventario_iso27001/
 ├── app.py
@@ -45,67 +45,73 @@ inventario_iso27001/
 
 ---
 
-## Seguridad
+## Security
 
-- Clave `secret.key` montada como volumen externo
-- Cifrado AES con `Fernet` para backups
-- Firma digital SHA256 en exportaciones
-- Auditoría completa de restauraciones y envíos
-- Protección por rol en rutas sensibles
-- Documentación Swagger protegida por login
+- `secret.key` mounted as an external volume
+- AES encryption with `Fernet` for backups
+- SHA256 digital signature on exports
+- Full audit trail for restorations and file transfers
+- Role-based protection for sensitive routes
+- Swagger documentation protected by login
 
 ---
 
-## Roles de usuario
+## User Roles
 
-| Usuario   | Contraseña   | Rol      | Acceso a                                      |
+| Username  | Password     | Role     | Access Scope                                  |
 |-----------|--------------|----------|-----------------------------------------------|
-| admin     | admin123     | Admin    | Todo: inventario, auditoría, restaurar, exportar |
-| auditor   | auditor123   | Auditor  | Solo auditoría                                |
-| operador  | operador123  | Operador | Inventario, restaurar, dashboard              |
+| admin     | admin123     | Admin    | Full access: inventory, audit, restore, export |
+| auditor   | auditor123   | Auditor  | Audit view only                               |
+| operator  | operador123  | Operator | Inventory, restore, dashboard                 |
 
 ---
 
-## Exportaciones
+## Export Options
 
-| Ruta                  | Descripción                        | Protegida por rol |
-|-----------------------|------------------------------------|-------------------|
-| `/auditoria/exportar` | Exportar CSV con firma digital     | admin             |
-| `/auditoria/pdf`      | Exportar PDF profesional           | admin             |
-| `/exportar`           | Exportar inventario en Excel       | admin             |
+| Route                 | Description                         | Role Protected |
+|----------------------|-------------------------------------|----------------|
+| `/auditoria/exportar`| Export audit as signed CSV          | admin          |
+| `/auditoria/pdf`     | Export audit as professional PDF    | admin          |
+| `/exportar`          | Export inventory as Excel file      | admin          |
 
 ---
 
-## Instalación rápida
+## Quick Installation
 
 ### Linux/macOS
 
-- git clone https://github.com/tu-usuario/inventario_iso27001.git
+Bash
+
+- git clone https://github.com/your-username/inventario_iso27001.git
 - cd inventario_iso27001
 - bash setup.sh
 
-### Windows
+### Windows (PowerShell)
 
 PowerShell
 
 - setup.bat
 
-### O con Makefile
+### Or with Makefile
 
 Bash
 
 - make setup
 - make run
 
-## DB
+---
 
-### Inicializar base de datos y claves
+## Database Setup
+
+### Initialize database and keys
 
 Bash
 
 - python init.py
 
-### Docker
+---
+
+## Docker
 
 Bash
 
@@ -113,59 +119,61 @@ Docker compose build
 
 Docker compose up
 
-### Para Docker con Depuración
+### Docker with Debug Mode
 
 Bash
 
 Docker compose up --build
 
-### Finalmente
-Accede a http://localhost:5000 en tu navegador.
+---
 
-## Problemas comunes
+## Access
 
-**Instalar Python 3.11**  
-   Descárgalo desde [python.org](https://www.python.org/downloads/release/python-3110/) y asegúrate de marcar la opción "Add Python to PATH" durante la instalación.
+Access the App at http://localhost:5000
+
+## Common Issues
+
+**Install Python 3.11**  
+   Download from [python.org](https://www.python.org/downloads/release/python-3110/) and make sure to check "Add Python to PATH" during installation
 
 ---
 
-## Requisitos
+## Requirements
 - Python 3.11+
 - Docker y Docker Compose
-- Make (Linux/macOS) o PowerShell (Windows)
-- Navegador web moderno
+- Make (Linux/macOS) or PowerShell (Windows)
+- Modern web browser
 
 ---
 
-## Comandos Makefile
+## Makefile Commands
 
 
-setup:      Inicializa entorno y base de datos
-run:        Levanta contenedores
-stop:       Detiene contenedores
-backup:     Ejecuta backup cifrado
-restore:    Accede a restauración web
-docs:       Abre Swagger UI
-clean:      Elimina contenedores y volúmenes
-
----
-
-## Restauración y auditoría
-
-- Restaurar backups desde /restaurar/<archivo>
-- Registrar automáticamente cada restauración en SQLite
-- Visualizar historial en /auditoria
-- Filtrar por fecha y destino
-- Exportar como CSV o PDF
+setup:      Initializes environment and database
+run:        Start containers
+stop:       Stop containers
+backup:     Executes encrypted backup
+restore:    Opens web restoration interface
+docs:       Opens Swagger UI
+clean:      Remove containers and volumes
 
 ---
 
-## Documentación Swagger
+## Restoration & Audit
 
-- Disponible en /apidocs (requiere login)
+- Restore backups from /restaurar/<file>
+- Automatically log each restoration in SQLite
+- View audit history at /auditoria
+- Filter by date and destination
+- Export as CSV or PDF
+---
+
+## Swagger Documentation
+
+- Available at /apidocs (login required)
 
 ---
 
-## Autor
+## Author
 
-Miguel — Arquitecto DevOps y administrador de sistemas, especializado en automatización, trazabilidad y cumplimiento ISO 27001 con enfoque en seguridad.
+Mikel — DevOps Architect and Systems Administrator, specialized in automation, traceability, and ISO 27001 compliance with a strong focus on security.

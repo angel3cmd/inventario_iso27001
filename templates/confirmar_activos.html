@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Confirmar importación de activos{% endblock %}
+{% block content %}
+  <h2>Vista previa de activos</h2>
+  <p>Archivo: <strong>{{ archivo }}</strong></p>
+  <form method="POST">
+    <table class="table table-bordered table-sm">
+      <thead>
+        <tr>
+          {% for key in datos[0].keys() %}
+            <th>{{ key }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for fila in datos %}
+          <tr>
+            {% for valor in fila.values() %}
+              <td>{{ valor }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Confirmar importación</button>
+    <a href="/importar/activos" class="btn btn-secondary ms-2">Cancelar</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Importar relaciones CI{% endblock %}
+{% block content %}
+  <h2>Importar relaciones entre elementos de configuración</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="archivo" class="form-label">Selecciona archivo Excel</label>
+      <input type="file" class="form-control" name="archivo" id="archivo" accept=".xlsx,.xls" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Importar</button>
+    <a href="/static/plantilla_relaciones.xlsx" class="btn btn-outline-secondary ms-2">Descargar plantilla</a>
+  </form>
+
+  <div class="alert alert-info mt-4">
+    <h5>Recomendaciones para llenar la plantilla:</h5>
+    <ul>
+      <li><code>origen_tipo</code> y <code>destino_tipo</code> deben ser <code>activo</code> o <code>integración</code></li>
+      <li><code>origen_id</code> y <code>destino_id</code> deben existir en sus respectivas tablas</li>
+      <li><code>tipo_relacion</code> puede ser <code>depende_de</code>, <code>conecta_con</code>, etc.</li>
+      <li><code>descripcion</code> es opcional</li>
+    </ul>
+  </div>
+{% endblock %}

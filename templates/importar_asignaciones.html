@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Importar asignaciones{% endblock %}
+{% block content %}
+  <h2>Importar asignaciones de activos a usuarios</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="archivo" class="form-label">Selecciona archivo Excel</label>
+      <input type="file" class="form-control" name="archivo" id="archivo" accept=".xlsx,.xls" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Importar</button>
+    <a href="/static/plantilla_asignaciones.xlsx" class="btn btn-outline-secondary ms-2">Descargar plantilla</a>
+  </form>
+
+  <div class="alert alert-info mt-4">
+    <h5>Recomendaciones para llenar la plantilla:</h5>
+    <ul>
+      <li><code>activo_id</code> y <code>usuario_id</code> deben existir en la base</li>
+      <li><code>fecha_asignacion</code> debe tener formato <strong>YYYY-MM-DD</strong></li>
+      <li><code>fecha_liberacion</code> puede estar vacía si el activo sigue asignado</li>
+      <li><code>observaciones</code> es opcional</li>
+    </ul>
+  </div>
+{% endblock %}

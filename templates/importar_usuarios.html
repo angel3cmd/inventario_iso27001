@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Importar usuarios{% endblock %}
+{% block content %}
+  <h2>Importar usuarios desde Excel</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="archivo" class="form-label">Selecciona archivo Excel</label>
+      <input type="file" class="form-control" name="archivo" id="archivo" accept=".xlsx,.xls" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Importar</button>
+    <a href="/static/plantilla_usuarios.xlsx" class="btn btn-outline-secondary ms-2">Descargar plantilla</a>
+  </form>
+  <div class="alert alert-info mt-4">
+  <h5>Recomendaciones:</h5>
+  <ul>
+    <li><code>usuario</code> debe ser único</li>
+    <li><code>clave</code> será cifrada automáticamente</li>
+    <li>Roles válidos: <code>admin</code>, <code>editor</code>, <code>lector</code></li>
+  </ul>
+</div>
+{% endblock %}

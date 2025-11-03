@@ -24,4 +24,14 @@
   <a href="/usuario/{{ session['usuario_id'] }}/activos" class="btn btn-light w-100 mb-3">📋 {{ t['ver_activos_asignados'] }}</a>
   <a href="/registrar_usuario" class="btn btn-primary w-100 mb-3">➕ {{ t['registrar_usuario_title'] }}</a>
 
+{% if session.get('rol') == 'admin' %}
+  <hr class="my-4">
+  <h5>📥 Importaciones</h5>
+  <a href="/importar/activos" class="btn btn-outline-dark w-100 mb-2">📦 Importar activos</a>
+  <a href="/importar/usuarios" class="btn btn-outline-dark w-100 mb-2">👤 Importar usuarios</a>
+  <a href="/importar/integraciones" class="btn btn-outline-dark w-100 mb-2">🔌 Importar integraciones</a>
+  <a href="/importar/relaciones" class="btn btn-outline-dark w-100 mb-2">🔗 Importar relaciones CI</a>
+  <a href="/importar/asignaciones" class="btn btn-outline-dark w-100 mb-2">📎 Importar asignaciones</a>
+{% endif %}
+
 {% endblock %}

@@ -1,0 +1,90 @@
+/* 🌙 Fondo general y texto */
+.tema-oscuro {
+  background-color: #121212;
+  color: #f0f0f0;
+}
+
+/* 🧱 Tarjetas */
+.tema-oscuro .card {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+/* 🧭 Navbar */
+.tema-oscuro .navbar {
+  background-color: #1f1f1f !important;
+}
+.tema-oscuro .navbar .nav-link {
+  color: #ccc !important;
+}
+.tema-oscuro .navbar .nav-link:hover {
+  color: #fff !important;
+}
+
+/* 📋 Tablas */
+.tema-oscuro table {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+.tema-oscuro th, .tema-oscuro td {
+  border-color: #444;
+}
+
+/* 📢 Alertas */
+.tema-oscuro .alert {
+  background-color: #2a2a2a;
+  color: #f0f0f0;
+  border-color: #555;
+}
+
+/* 🔘 Botones outline */
+.tema-oscuro .btn-outline-primary,
+.tema-oscuro .btn-outline-secondary,
+.tema-oscuro .btn-outline-dark {
+  border-color: #bbb;
+  color: #bbb;
+}
+.tema-oscuro .btn-outline-primary:hover,
+.tema-oscuro .btn-outline-secondary:hover,
+.tema-oscuro .btn-outline-dark:hover {
+  background-color: #444;
+  color: #fff;
+}
+
+/* 🧮 Selects y formularios */
+.tema-oscuro .form-control,
+.tema-oscuro .form-select {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border-color: #555;
+}
+.tema-oscuro .form-control:focus,
+.tema-oscuro .form-select:focus {
+  background-color: #2a2a2a;
+  color: #fff;
+  border-color: #888;
+}
+
+/* 📊 Gráficos canvas */
+.tema-oscuro canvas {
+  background-color: #1e1e1e;
+}
+
+/* 🌙 Footer en modo oscuro */
+.tema-oscuro footer {
+  background-color: #1a1a1a;
+  color: #ccc;
+  border-top: 1px solid #444;
+}
+
+.tema-oscuro footer a {
+  color: #bbb;
+}
+
+.tema-oscuro footer a:hover {
+  color: #fff;
+}
+
+.tema-oscuro .text-muted {
+  color: #aaa !important;
+}

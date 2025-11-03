@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Importar activos{% endblock %}
+{% block content %}
+  <h2>Importar activos desde Excel</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="archivo" class="form-label">Selecciona archivo Excel</label>
+      <input type="file" class="form-control" name="archivo" id="archivo" accept=".xlsx,.xls" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Importar</button>
+    <a href="/static/plantilla_activos.xlsx" class="btn btn-outline-secondary ms-2">Descargar plantilla</a>
+  </form>
+  <div class="alert alert-info mt-4">
+  <h5>Recomendaciones para llenar la plantilla:</h5>
+  <ul>
+    <li>Usa formato de fecha <strong>YYYY-MM-DD</strong> en <code>fecha_alta</code></li>
+    <li>Clasificación debe ser: <code>Confidencial</code>, <code>Interno</code> o <code>Público</code></li>
+    <li>Evita duplicados en <code>etiqueta</code> y <code>nombre</code></li>
+    <li>Todos los campos son obligatorios excepto <code>etiqueta</code></li>
+  </ul>
+</div>
+
+{% endblock %}

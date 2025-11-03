@@ -4,7 +4,8 @@ import hashlib
 import sqlite3
 from flask import Flask, render_template, request, redirect, session, send_file, Response, jsonify, flash, url_for
 import datetime
-
+import pandas as pd
+from werkzeug.utils import secure_filename
 from io import StringIO
 from datetime import datetime
 from dotenv import load_dotenv
@@ -31,6 +32,7 @@ from controllers.activos_controller import activos_blueprint
 from auth import login_required, autenticar, es_admin, obtener_rol, auth_blueprint
 from dashboard import obtener_metricas, dashboard_blueprint
 from flask import Flask, render_template
+
 
 # 🗂️ Crear carpetas persistentes si no existen
 os.makedirs('data', exist_ok=True)
@@ -517,7 +519,433 @@ def validacion_iso():
 
     return render_con_idioma("validacion_iso.html", errores=errores)
 
+#importar activos - subida
+@app.route('/importar/activos', methods=['GET', 'POST'])
+@login_required
+def importar_activos():
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        if not archivo or not archivo.filename.endswith(('.xlsx', '.xls')):
+            flash('Por favor sube un archivo Excel válido (.xlsx o .xls)', 'warning')
+            return redirect(request.url)
 
+        try:
+            df = pd.read_excel(archivo)
+            preview = []
+            errores = []
+
+            for i, row in df.iterrows():
+                fila = row.to_dict()
+                fila_error = []
+
+                # Validaciones básicas
+                if not fila.get('nombre'):
+                    fila_error.append("Falta el nombre")
+                if not fila.get('tipo'):
+                    fila_error.append("Falta el tipo")
+                if not fila.get('propietario'):
+                    fila_error.append("Falta el propietario")
+                if not fila.get('fecha_alta'):
+                    fila_error.append("Falta la fecha")
+                else:
+                    try:
+                        pd.to_datetime(fila['fecha_alta'])
+                    except:
+                        fila_error.append("Fecha inválida")
+
+                preview.append({'datos': fila, 'errores': fila_error})
+
+            session['preview_activos'] = preview
+            session['archivo_nombre'] = archivo.filename
+            return redirect('/importar/activos/confirmar')
+        except Exception as e:
+            flash(f"Error al procesar el archivo: {e}", 'danger')
+            return redirect(request.url)
+
+    return render_template('importar_activos.html')
+
+
+#importar activos - confirmación
+@app.route('/importar/activos/confirmar', methods=['GET', 'POST'])
+@login_required
+def confirmar_importacion_activos():
+    datos = session.get('preview_activos', [])
+    archivo_nombre = session.get('archivo_nombre', 'archivo.xlsx')
+
+    if request.method == 'POST':
+        db = get_db()
+        errores = []
+
+        for i, fila in enumerate(datos):
+            if fila['errores']:
+                continue  # Saltar filas con errores
+
+            row = fila['datos']
+            try:
+                db.execute("""
+                    INSERT INTO activos (nombre, tipo, propietario, ubicacion, clasificacion, estado, fecha_alta, etiqueta)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    row['nombre'],
+                    row['tipo'],
+                    row['propietario'],
+                    row['ubicacion'],
+                    row['clasificacion'],
+                    row['estado'],
+                    row['fecha_alta'],
+                    row.get('etiqueta', '')
+                ))
+            except Exception as e:
+                errores.append(f"Fila {i+2}: {e}")
+
+        db.commit()
+        db.execute("INSERT INTO auditoria_envios (fecha, archivo, destino) VALUES (?, ?, ?)",
+                   (datetime.now().isoformat(), archivo_nombre, 'activos'))
+        db.commit()
+
+        session.pop('preview_activos', None)
+        session.pop('archivo_nombre', None)
+
+        if errores:
+            flash(f"Importación completada con errores: {len(errores)} filas fallaron", 'danger')
+        else:
+            flash("Activos importados correctamente", 'success')
+        return redirect('/')
+
+    return render_template('confirmar_generico.html', datos=datos, archivo=archivo_nombre, entidad='activos')
+
+#importar usuarios - subida
+@app.route('/importar/usuarios', methods=['GET', 'POST'])
+@login_required
+def importar_usuarios():
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        if not archivo or not archivo.filename.endswith(('.xlsx', '.xls')):
+            flash('Archivo inválido', 'warning')
+            return redirect(request.url)
+
+        try:
+            df = pd.read_excel(archivo)
+            preview = []
+
+            for i, row in df.iterrows():
+                fila = row.to_dict()
+                errores = []
+
+                if not fila.get('usuario'): errores.append("Falta usuario")
+                if not fila.get('nombre'): errores.append("Falta nombre")
+                if not fila.get('clave'): errores.append("Falta clave")
+                if fila.get('rol') not in ['admin', 'editor', 'lector']:
+                    errores.append("Rol inválido")
+
+                preview.append({'datos': fila, 'errores': errores})
+
+            session['preview_usuarios'] = preview
+            session['archivo_nombre'] = archivo.filename
+            return redirect('/importar/usuarios/confirmar')
+        except Exception as e:
+            flash(f"Error: {e}", 'danger')
+            return redirect(request.url)
+
+    return render_template('importar_usuarios.html')
+
+
+#importar usuarios - confirmación
+@app.route('/importar/usuarios/confirmar', methods=['GET', 'POST'])
+@login_required
+def confirmar_importacion_usuarios():
+    datos = session.get('preview_usuarios', [])
+    archivo_nombre = session.get('archivo_nombre', 'archivo.xlsx')
+
+    if request.method == 'POST':
+        db = get_db()
+        errores = []
+
+        for i, fila in enumerate(datos):
+            if fila['errores']: continue
+            row = fila['datos']
+            try:
+                clave_hash = hashlib.sha256(str(row['clave']).encode()).hexdigest()
+                db.execute("""
+                    INSERT INTO usuarios (usuario, nombre, clave, rol)
+                    VALUES (?, ?, ?, ?)
+                """, (
+                    row['usuario'], row['nombre'], clave_hash, row['rol']
+                ))
+            except Exception as e:
+                errores.append(f"Fila {i+2}: {e}")
+
+        db.commit()
+        db.execute("INSERT INTO auditoria_envios (fecha, archivo, destino) VALUES (?, ?, ?)",
+                   (datetime.now().isoformat(), archivo_nombre, 'usuarios'))
+        db.commit()
+
+        session.pop('preview_usuarios', None)
+        session.pop('archivo_nombre', None)
+
+        flash("Usuarios importados" if not errores else f"{len(errores)} errores", 'info')
+        return redirect('/')
+
+    return render_template('confirmar_generico.html', datos=datos, archivo=archivo_nombre, entidad='usuarios')
+
+#Importar Integraciones - subida
+@app.route('/importar/integraciones', methods=['GET', 'POST'])
+@login_required
+def importar_integraciones():
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        if not archivo or not archivo.filename.endswith(('.xlsx', '.xls')):
+            flash('Archivo inválido', 'warning')
+            return redirect(request.url)
+
+        try:
+            df = pd.read_excel(archivo)
+            preview = []
+
+            for i, row in df.iterrows():
+                fila = row.to_dict()
+                errores = []
+
+                if not fila.get('nombre'): errores.append("Falta nombre")
+                if not fila.get('tipo'): errores.append("Falta tipo")
+                if not fila.get('estado'): errores.append("Falta estado")
+
+                preview.append({'datos': fila, 'errores': errores})
+
+            session['preview_integraciones'] = preview
+            session['archivo_nombre'] = archivo.filename
+            return redirect('/importar/integraciones/confirmar')
+        except Exception as e:
+            flash(f"Error: {e}", 'danger')
+            return redirect(request.url)
+
+    return render_template('importar_integraciones.html')
+
+#Importar Integraciones - confirmación
+@app.route('/importar/integraciones/confirmar', methods=['GET', 'POST'])
+@login_required
+def confirmar_importacion_integraciones():
+    datos = session.get('preview_integraciones', [])
+    archivo_nombre = session.get('archivo_nombre', 'archivo.xlsx')
+
+    if request.method == 'POST':
+        db = get_db()
+        errores = []
+
+        for i, fila in enumerate(datos):
+            if fila['errores']: continue
+            row = fila['datos']
+            try:
+                db.execute("""
+                    INSERT INTO integraciones (nombre, tipo, estado)
+                    VALUES (?, ?, ?)
+                """, (
+                    row['nombre'], row['tipo'], row['estado']
+                ))
+            except Exception as e:
+                errores.append(f"Fila {i+2}: {e}")
+
+        db.commit()
+        db.execute("INSERT INTO auditoria_envios (fecha, archivo, destino) VALUES (?, ?, ?)",
+                   (datetime.now().isoformat(), archivo_nombre, 'integraciones'))
+        db.commit()
+
+        session.pop('preview_integraciones', None)
+        session.pop('archivo_nombre', None)
+
+        flash("Integraciones importadas" if not errores else f"{len(errores)} errores", 'info')
+        return redirect('/')
+
+    return render_template('confirmar_generico.html', datos=datos, archivo=archivo_nombre, entidad='integraciones')
+
+#Importar relaciones - subida
+@app.route('/importar/relaciones', methods=['GET', 'POST'])
+@login_required
+def importar_relaciones():
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        if not archivo or not archivo.filename.endswith(('.xlsx', '.xls')):
+            flash('Archivo inválido', 'warning')
+            return redirect(request.url)
+
+        try:
+            df = pd.read_excel(archivo)
+            preview = []
+
+            for i, row in df.iterrows():
+                fila = row.to_dict()
+                errores = []
+
+                if not fila.get('origen_tipo'):
+                    errores.append("Falta origen_tipo")
+                if not fila.get('origen_id'):
+                    errores.append("Falta origen_id")
+                if not fila.get('destino_tipo'):
+                    errores.append("Falta destino_tipo")
+                if not fila.get('destino_id'):
+                    errores.append("Falta destino_id")
+                if not fila.get('tipo_relacion'):
+                    errores.append("Falta tipo_relacion")
+
+                # Validar que origen_id y destino_id sean enteros
+                try:
+                    int(fila['origen_id'])
+                    int(fila['destino_id'])
+                except:
+                    errores.append("IDs deben ser numéricos")
+
+                preview.append({'datos': fila, 'errores': errores})
+
+            session['preview_relaciones'] = preview
+            session['archivo_nombre'] = archivo.filename
+            return redirect('/importar/relaciones/confirmar')
+        except Exception as e:
+            flash(f"Error: {e}", 'danger')
+            return redirect(request.url)
+
+    return render_template('importar_relaciones.html')
+
+
+#Importar relaciones - confirmación
+@app.route('/importar/relaciones/confirmar', methods=['GET', 'POST'])
+@login_required
+def confirmar_importacion_relaciones():
+    datos = session.get('preview_relaciones', [])
+    archivo_nombre = session.get('archivo_nombre', 'archivo.xlsx')
+
+    if request.method == 'POST':
+        db = get_db()
+        errores = []
+
+        for i, fila in enumerate(datos):
+            if fila['errores']:
+                continue
+            row = fila['datos']
+            try:
+                db.execute("""
+                    INSERT INTO relaciones_ci (origen_tipo, origen_id, destino_tipo, destino_id, tipo_relacion, descripcion)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    row['origen_tipo'],
+                    int(row['origen_id']),
+                    row['destino_tipo'],
+                    int(row['destino_id']),
+                    row['tipo_relacion'],
+                    row.get('descripcion', '')
+                ))
+            except Exception as e:
+                errores.append(f"Fila {i+2}: {e}")
+
+        db.commit()
+        db.execute("INSERT INTO auditoria_envios (fecha, archivo, destino) VALUES (?, ?, ?)",
+                   (datetime.now().isoformat(), archivo_nombre, 'relaciones_ci'))
+        db.commit()
+
+        session.pop('preview_relaciones', None)
+        session.pop('archivo_nombre', None)
+
+        flash("Relaciones importadas" if not errores else f"{len(errores)} errores", 'info')
+        return redirect('/')
+
+    return render_template('confirmar_generico.html', datos=datos, archivo=archivo_nombre, entidad='relaciones')
+
+#Importar asignaciones - subida
+@app.route('/importar/asignaciones', methods=['GET', 'POST'])
+@login_required
+def importar_asignaciones():
+    if request.method == 'POST':
+        archivo = request.files.get('archivo')
+        if not archivo or not archivo.filename.endswith(('.xlsx', '.xls')):
+            flash('Archivo inválido', 'warning')
+            return redirect(request.url)
+
+        try:
+            df = pd.read_excel(archivo)
+            db = get_db()
+            preview = []
+
+            for i, row in df.iterrows():
+                fila = row.to_dict()
+                errores = []
+
+                # Validaciones básicas
+                if not fila.get('activo_id'):
+                    errores.append("Falta activo_id")
+                if not fila.get('usuario_id'):
+                    errores.append("Falta usuario_id")
+                if not fila.get('fecha_asignacion'):
+                    errores.append("Falta fecha_asignacion")
+                else:
+                    try:
+                        pd.to_datetime(fila['fecha_asignacion'])
+                    except:
+                        errores.append("Fecha de asignación inválida")
+
+                # Validar existencia de activo y usuario
+                try:
+                    activo_id = int(fila['activo_id'])
+                    usuario_id = int(fila['usuario_id'])
+                    activo = db.execute("SELECT id FROM activos WHERE id = ?", (activo_id,)).fetchone()
+                    usuario = db.execute("SELECT id FROM usuarios WHERE id = ?", (usuario_id,)).fetchone()
+                    if not activo:
+                        errores.append(f"Activo {activo_id} no existe")
+                    if not usuario:
+                        errores.append(f"Usuario {usuario_id} no existe")
+                except:
+                    errores.append("IDs deben ser numéricos")
+
+                preview.append({'datos': fila, 'errores': errores})
+
+            session['preview_asignaciones'] = preview
+            session['archivo_nombre'] = archivo.filename
+            return redirect('/importar/asignaciones/confirmar')
+        except Exception as e:
+            flash(f"Error: {e}", 'danger')
+            return redirect(request.url)
+
+    return render_template('importar_asignaciones.html')
+
+#Importar asignaciones - confirmación
+@app.route('/importar/asignaciones/confirmar', methods=['GET', 'POST'])
+@login_required
+def confirmar_importacion_asignaciones():
+    datos = session.get('preview_asignaciones', [])
+    archivo_nombre = session.get('archivo_nombre', 'archivo.xlsx')
+
+    if request.method == 'POST':
+        db = get_db()
+        errores = []
+
+        for i, fila in enumerate(datos):
+            if fila['errores']:
+                continue
+            row = fila['datos']
+            try:
+                db.execute("""
+                    INSERT INTO asignaciones_activos (activo_id, usuario_id, fecha_asignacion, fecha_liberacion, observaciones)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    int(row['activo_id']),
+                    int(row['usuario_id']),
+                    row['fecha_asignacion'],
+                    row.get('fecha_liberacion', None),
+                    row.get('observaciones', '')
+                ))
+            except Exception as e:
+                errores.append(f"Fila {i+2}: {e}")
+
+        db.commit()
+        db.execute("INSERT INTO auditoria_envios (fecha, archivo, destino) VALUES (?, ?, ?)",
+                   (datetime.now().isoformat(), archivo_nombre, 'asignaciones_activos'))
+        db.commit()
+
+        session.pop('preview_asignaciones', None)
+        session.pop('archivo_nombre', None)
+
+        flash("Asignaciones importadas" if not errores else f"{len(errores)} errores", 'info')
+        return redirect('/')
+
+    return render_template('confirmar_generico.html', datos=datos, archivo=archivo_nombre, entidad='asignaciones')
 
 #Rellenar el main
 

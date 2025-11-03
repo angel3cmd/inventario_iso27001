@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Confirmar importación de {{ entidad }}{% endblock %}
+{% block content %}
+  <h2>Vista previa de {{ entidad }}</h2>
+  <p>Archivo: <strong>{{ archivo }}</strong></p>
+
+  <form method="POST">
+    <table class="table table-bordered table-sm">
+      <thead>
+        <tr>
+          {% for key in datos[0]['datos'].keys() %}
+            <th>{{ key }}</th>
+          {% endfor %}
+          <th>Errores</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fila in datos %}
+          <tr class="{% if fila.errores %}table-danger{% endif %}">
+            {% for valor in fila.datos.values() %}
+              <td>{{ valor }}</td>
+            {% endfor %}
+            <td>
+              {% if fila.errores %}
+                <ul class="mb-0">
+                  {% for error in fila.errores %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <span class="text-success">✓</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success" {% if datos|selectattr("errores")|select("length")|list %}disabled{% endif %}>Confirmar importación</button>
+    <a href="/importar/{{ entidad }}" class="btn btn-secondary ms-2">Cancelar</a>
+  </form>
+{% endblock %}
